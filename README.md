@@ -1,2 +1,2 @@
 # standards
-Unofficial reference for UTM-related APIs
+Unofficial reference for UAS-related APIs
