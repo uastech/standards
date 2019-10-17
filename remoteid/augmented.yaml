@@ -1,7 +1,7 @@
 ---
 openapi: 3.0.2
 info:
-  title: Discovery and Synchronization Service - USS-DSS, USS-USS
+  title: Discovery and Synchronization Service
   version: 0.8.0
   description: |-
     Interface to Discovery and Synchronization Service and service providers used by participating clients to discover and inform other service providers.
