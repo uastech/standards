@@ -1373,7 +1373,6 @@ components:
             Subscription is created, modified, or deleted.  Must implement PUT and
             DELETE according to the `/uss/identification_service_areas/{id}` path
             API.
-          example: https://example.com/identification_service_areas
     PutSubscriptionResponse:
       description: Response for a request to create or update a subscription.
       required:
@@ -1428,7 +1427,7 @@ components:
           $ref: '#/components/schemas/RIDAuthData'
         serial_number:
           description: Can be specified when no registration ID exists and required
-            by law in a region. This is expressed in the ANSI/CTA-2063 Physical Serial
+            by law in a region. This is expressed in the ANSI/CTA-2063-A Physical Serial
             Number format.
           type: string
           example: INTCJ123-4567-890
@@ -1713,11 +1712,11 @@ components:
       description: |-
         Type of aircraft for the purposes of remote ID.
 
-        `VTOL` is a fixed wing aircraft that can take off vertically.  `Rotocraft` includes multirotor.
+        `VTOL` is a fixed wing aircraft that can take off vertically.  `Helicopter` includes multirotor.
       enum:
       - NotDeclared
       - Aeroplane
-      - Rotorcraft
+      - Helicopter
       - Gyroplane
       - VTOL
       - Ornithopter
