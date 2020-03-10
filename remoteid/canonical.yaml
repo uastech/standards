@@ -2,7 +2,7 @@
 openapi: 3.0.2
 info:
   title: Discovery and Synchronization Service - USS-DSS, USS-USS
-  version: 0.8.0
+  version: 1.0.0
   description: |-
     Interface to Discovery and Synchronization Service and service providers used by participating clients to discover and inform other service providers.
 
@@ -120,7 +120,7 @@ paths:
           description: The requested Entity could not be found.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.position_reporting_entities
+        - dss.read.identification_service_areas
       summary: /dss/identification_service_areas/{id}
       description: Retrieve full information of an Identification Service Area owned
         by the client.
@@ -545,8 +545,8 @@ paths:
           description: A Subscription with the specified ID was not found.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.position_reporting_entities
-        - dss.write.position_reporting_entities
+        - dss.read.identification_service_areas
+        - dss.write.identification_service_areas
       summary: /dss/subscriptions/{id}
       description: Verify the existence/valdity and state of a particular subscription.
     put:
@@ -744,7 +744,7 @@ paths:
             * Despite repeated attempts, the DSS was unable to update the DAR because of other simultaneous changes.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.position_reporting_entities
+        - dss.read.identification_service_areas
       summary: /dss/subscriptions/{id}/{version}
       description: Delete a subscription.
     parameters:
@@ -1359,7 +1359,7 @@ components:
         Areas may be delivered.  See the `/uss/identification_service_areas/{id}`
         path for specification of this endpoint.
       type: string
-      example: https://example.com/identification_service_areas/a4c6f8c0-ad77-4d93-9cc2-ec8601383f96
+      example: https://example.com/identification_service_areas
     SubscriptionCallbacks:
       description: Endpoints that should be called when an applicable event occurs.  At
         least one field must be specified.
@@ -1427,7 +1427,7 @@ components:
           $ref: '#/components/schemas/RIDAuthData'
         serial_number:
           description: Can be specified when no registration ID exists and required
-            by law in a region. This is expressed in the ANSI/CTA-2063 Physical Serial
+            by law in a region. This is expressed in the ANSI/CTA-2063-A Physical Serial
             Number format.
           type: string
           example: INTCJ123-4567-890
@@ -1712,11 +1712,11 @@ components:
       description: |-
         Type of aircraft for the purposes of remote ID.
 
-        `VTOL` is a fixed wing aircraft that can take off vertically.  `Rotocraft` includes multirotor.
+        `VTOL` is a fixed wing aircraft that can take off vertically.  `Helicopter` includes multirotor.
       enum:
       - NotDeclared
       - Aeroplane
-      - Rotorcraft
+      - Helicopter
       - Gyroplane
       - VTOL
       - Ornithopter
@@ -1766,12 +1766,8 @@ components:
         Clients shall provide these access tokens in an `Authorization` header in the form `Bearer <token>` in accordance with RFC 6750.
 security:
 - AuthFromAuthorizationAuthority:
-  - dss.read.position_reporting_entities
-  - dss.write.position_reporting_entities
-  - dss.read.airspace_awareness
-  - dss.write.airspace_awareness
-  - dss.write.operations
-  - dss.write.constraints
+  - dss.read.identification_service_areas
+  - dss.write.identification_service_areas
 tags:
 - name: dss
   description: Endpoints exposed by the DSS server.
