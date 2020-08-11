@@ -1171,9 +1171,9 @@ components:
       format: double
       description: Degrees of longitude east of the Prime Meridian, with reference
         to the WGS84 ellipsoid.
-      maximum: -180
+      maximum: 180
       exclusiveMaximum: false
-      minimum: 180
+      minimum: -180
       exclusiveMinimum: false
       type: number
       example: -118.456
@@ -1306,7 +1306,8 @@ components:
           items:
             $ref: '#/components/schemas/SubscriptionState'
         extents:
-          $ref: '#/components/schemas/Volume4D'
+          anyOf:
+            $ref: '#/components/schemas/Volume4D'
           description: |-
             The new or updated extents of the Identification Service Area.
 
