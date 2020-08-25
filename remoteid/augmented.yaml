@@ -925,7 +925,7 @@ components:
       description: State of AreaSubscription which is causing a notification to be
         sent.
       required:
-      - subscription
+      - subscription_id
       type: object
       properties:
         subscription_id:
