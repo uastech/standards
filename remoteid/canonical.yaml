@@ -1,7 +1,7 @@
 openapi: 3.0.2
 info:
-  title: Discovery and Synchronization Service - USS-DSS, USS-USS
-  version: 1.0.0
+  title: Standard Remote ID API Interfaces
+  version: 2.0.0
   description: |-
     Interface to Discovery and Synchronization Service and service providers used by participating clients to discover and inform other service providers.
 
@@ -13,6 +13,7 @@ paths:
     get:
       tags:
       - dss
+      operationId: searchIdentificationServiceAreas
       parameters:
       - name: area
         description: The area in which to search for Identification Service Areas.  Some
@@ -83,6 +84,7 @@ paths:
     get:
       tags:
       - dss
+      operationId: getIdentificationServiceArea
       responses:
         200:
           content:
@@ -132,6 +134,7 @@ paths:
         required: true
       tags:
       - dss
+      operationId: createIdentificationServiceArea
       responses:
         200:
           content:
@@ -202,6 +205,7 @@ paths:
         required: true
       tags:
       - dss
+      operationId: updateIdentificationServiceArea
       responses:
         200:
           content:
@@ -257,6 +261,7 @@ paths:
     delete:
       tags:
       - dss
+      operationId: deleteIdentificationServiceArea
       responses:
         200:
           content:
@@ -328,6 +333,7 @@ paths:
     get:
       tags:
       - p2p_rid
+      operationId: searchFlights
       responses:
         200:
           content:
@@ -403,6 +409,7 @@ paths:
     get:
       tags:
       - p2p_rid
+      operationId: getFlightDetails
       responses:
         200:
           content:
@@ -455,6 +462,7 @@ paths:
     get:
       tags:
       - dss
+      operationId: searchSubscriptions
       parameters:
       - name: area
         description: The area in which to search for Subscriptions.  Some Subscriptions
@@ -509,6 +517,7 @@ paths:
     get:
       tags:
       - dss
+      operationId: getSubscription
       responses:
         200:
           content:
@@ -557,6 +566,7 @@ paths:
         required: true
       tags:
       - dss
+      operationId: createSubscription
       responses:
         200:
           content:
@@ -636,6 +646,7 @@ paths:
         required: true
       tags:
       - dss
+      operationId: updateSubscription
       responses:
         200:
           content:
@@ -699,6 +710,7 @@ paths:
     delete:
       tags:
       - dss
+      operationId: deleteSubscription
       responses:
         200:
           content:
@@ -772,6 +784,7 @@ paths:
         required: true
       tags:
       - p2p_rid
+      operationId: postIdentificationServiceArea
       responses:
         204:
           description: Information for Identification Service Area was updated successfully.
