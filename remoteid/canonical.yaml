@@ -1,4 +1,3 @@
----
 openapi: 3.0.2
 info:
   title: Discovery and Synchronization Service - USS-DSS, USS-USS
@@ -10,7 +9,7 @@ info:
 paths:
   /v1/dss/identification_service_areas:
     summary: Set of Identification Service Areas in the DSS.
-    description: ""
+    description: ''
     get:
       tags:
       - dss
@@ -1427,8 +1426,8 @@ components:
           $ref: '#/components/schemas/RIDAuthData'
         serial_number:
           description: Can be specified when no registration ID exists and required
-            by law in a region. This is expressed in the ANSI/CTA-2063-A Physical Serial
-            Number format.
+            by law in a region. This is expressed in the ANSI/CTA-2063-A Physical
+            Serial Number format.
           type: string
           example: INTCJ123-4567-890
         registration_number:
@@ -1438,7 +1437,7 @@ components:
           type: string
           example: FA12345897
     RIDRecentAircraftPosition:
-      description: ""
+      description: ''
       required:
       - time
       - position
