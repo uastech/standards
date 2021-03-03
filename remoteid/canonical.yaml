@@ -7,7 +7,7 @@ info:
 
     Unless otherwise specified, fields specified in a message but not declared in the API shall be ignored.
 paths:
-  /v1/dss/identification_service_areas:
+  /v2/dss/identification_service_areas:
     summary: Set of Identification Service Areas in the DSS.
     description: ''
     get:
@@ -79,7 +79,7 @@ paths:
       description: Retrieve all Identification Service Areas in the DAR for a given
         area during the given time.  Note that some Identification Service Areas returned
         may lie entirely outside the requested area.
-  /v1/dss/identification_service_areas/{id}:
+  /v2/dss/identification_service_areas/{id}:
     summary: An Identification Service Area in the DSS.
     get:
       tags:
@@ -194,7 +194,7 @@ paths:
         $ref: '#/components/schemas/EntityUUID'
       in: path
       required: true
-  /v1/dss/identification_service_areas/{id}/{version}:
+  /v2/dss/identification_service_areas/{id}/{version}:
     summary: A specific version of an Identification Service Area in the DSS.
     put:
       requestBody:
@@ -326,7 +326,7 @@ paths:
         type: string
       in: path
       required: true
-  /v1/uss/flights:
+  /v2/uss/flights:
     summary: Basic operation details to meet remote ID requirements.
     description: This endpoint may be polled by remote ID display providers to display
       basic aircraft activity near a user in real time.
@@ -404,7 +404,7 @@ paths:
       schema:
         type: boolean
       in: query
-  /v1/uss/flights/{id}/details:
+  /v2/uss/flights/{id}/details:
     summary: A remote ID flight reported by a remote ID service provider.
     get:
       tags:
@@ -457,7 +457,7 @@ paths:
         $ref: '#/components/schemas/RIDFlightID'
       in: path
       required: true
-  /v1/dss/subscriptions:
+  /v2/dss/subscriptions:
     summary: Subscriptions for airspace updates to a volume of interest.
     get:
       tags:
@@ -512,7 +512,7 @@ paths:
         Retrieve subscriptions intersecting an area of interest.  Subscription notifications are only triggered by (and contain full information of) changes to, creation of, or deletion of, Entities referenced by or stored in the DSS; they do not involve any data transfer (such as remote ID telemetry updates) apart from Entity information.
 
         Only Subscriptions belonging to the caller are returned.  This endpoint would be used if a USS lost track of Subscriptions they had created and/or wanted to resolve an error indicating that they had too many existing Subscriptions in an area.
-  /v1/dss/subscriptions/{id}:
+  /v2/dss/subscriptions/{id}:
     summary: Subscription for airspace updates to a volume of interest.
     get:
       tags:
@@ -634,7 +634,7 @@ paths:
         $ref: '#/components/schemas/SubscriptionUUID'
       in: path
       required: true
-  /v1/dss/subscriptions/{id}/{version}:
+  /v2/dss/subscriptions/{id}/{version}:
     summary: Specific version of a Subscription for airspace updates to a volume of
       interest.
     put:
@@ -773,7 +773,7 @@ paths:
         type: string
       in: path
       required: true
-  /v1/uss/identification_service_areas/{id}:
+  /v2/uss/identification_service_areas/{id}:
     summary: Notifications of change to Identification Service Areas.
     post:
       requestBody:
