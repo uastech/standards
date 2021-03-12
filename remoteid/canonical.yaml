@@ -361,16 +361,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The access token was decoded successfully but did not include
             a scope appropriate to this endpoint.
-        404:
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ErrorResponse'
-          description: The requested view is entirely outside any remote ID service
-            provision areas (PositionReporting Entity volumes) this provider has.  A
-            display provider receiving this response should discontinue polling for
-            this endpoint for the view port requested until otherwise directed by
-            DSS interactions.
         413:
           content:
             application/json:
@@ -912,6 +902,14 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RIDFlight'
+        no_isas_present:
+          type: boolean
+          default: false
+          description: The requested view is entirely outside any remote ID service
+            provision areas (Identification Service Area volumes) this provider has.  A
+            display provider receiving this response should discontinue polling for
+            this endpoint for the view port requested until otherwise directed by
+            DSS interactions.
     URL:
       description: Valid http or https URL.
       type: string
