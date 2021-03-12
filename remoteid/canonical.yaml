@@ -1362,27 +1362,6 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/SubscriberToNotify'
-    IdentificationServiceAreaURL:
-      anyOf:
-      - $ref: '#/components/schemas/URL'
-      description: The URL at which notifications regarding Identification Service
-        Areas may be delivered.  See the `/uss/identification_service_areas/{id}`
-        path for specification of this endpoint.
-      type: string
-      example: https://example.com/identification_service_areas
-    SubscriptionCallbacks:
-      description: Endpoints that should be called when an applicable event occurs.  At
-        least one field must be specified.
-      type: object
-      properties:
-        identification_service_area_url:
-          anyOf:
-          - $ref: '#/components/schemas/IdentificationServiceAreaURL'
-          description: If specified, other clients will be instructed by the DSS to
-            call this endpoint when an Identification Service Area relevant to this
-            Subscription is created, modified, or deleted.  Must implement PUT and
-            DELETE according to the `/uss/identification_service_areas/{id}` path
-            API.
     PutSubscriptionResponse:
       description: Response for a request to create or update a subscription.
       required:
@@ -1485,8 +1464,8 @@ components:
             The bounding spacetime extents of this Identification Service Area.  End time must be specified.  If start time is not specified, it will be set to the current time.  Start times in the past should be rejected by the DSS, except that it may adjust very recent start times to the current time.
 
             These extents should not reveal any sensitive information about the flight or flights within them.  This means, for instance, that extents should not tightly-wrap a flight path, nor should they generally be centered around the takeoff point of a single flight.
-        flights_url:
-          $ref: '#/components/schemas/RIDFlightsURL'
+        uss_base_url:
+          $ref: '#/components/schemas/FlightsUSSBaseURL'
     UpdateIdentificationServiceAreaParameters:
       description: Parameters for a request to update an Identification Service Area
         in the DSS.
@@ -1502,8 +1481,8 @@ components:
             The bounding spacetime extents of this Identification Service Area.  End time must be specified.  If start time is not specified, it will remain unchanged.  Start times in the past should be rejected by the DSS unless they are unchanged from the Identification Service Area's current start time.
 
             These extents should not reveal any sensitive information about the flight or flights within them.  This means, for instance, that extents should not tightly-wrap a flight path, nor should they generally be centered around the takeoff point of a single flight.
-        flights_url:
-          $ref: '#/components/schemas/RIDFlightsURL'
+        uss_base_url:
+          $ref: '#/components/schemas/FlightsUSSBaseURL'
     CreateSubscriptionParameters:
       description: Parameters for a request to create a subscription in the DSS.
       required:
@@ -1520,8 +1499,8 @@ components:
             This subscription will automatically be deleted after its end time if it has not been refreshed by then.  If end time is not specified, the value will be chosen automatically by the DSS.
 
             Note that some Entities triggering notifications may lie entirely outside the requested area.
-        callbacks:
-          $ref: '#/components/schemas/SubscriptionCallbacks'
+        uss_base_url:
+          $ref: '#/components/schemas/SubscriptionUSSBaseURL'
     UpdateSubscriptionParameters:
       description: Parameters for a request to update a subscription in the DSS.
       required:
@@ -1538,8 +1517,8 @@ components:
             This subscription will automatically be deleted after its end time if it has not been refreshed by then.  If end time is not specified, the value will be chosen automatically by the DSS.
 
             Note that some Entities triggering notifications may lie entirely outside the requested area.
-        callbacks:
-          $ref: '#/components/schemas/SubscriptionCallbacks'
+        uss_base_url:
+          $ref: '#/components/schemas/SubscriptionUSSBaseURL'
     Subscription:
       description: Specification of a geographic area that a client is interested
         in on an ongoing basis (e.g., “planning area”).  Internal to the DSS.
@@ -1556,8 +1535,8 @@ components:
           anyOf:
           - $ref: '#/components/schemas/SubscriptionUUID'
           description: Unique identifier for this subscription.
-        callbacks:
-          $ref: '#/components/schemas/SubscriptionCallbacks'
+        uss_base_url:
+          $ref: '#/components/schemas/SubscriptionUSSBaseURL'
         owner:
           description: Assigned by the DSS based on creating client’s ID (via access
             token).  Used for restricting mutation and deletion operations to owner.
@@ -1590,8 +1569,8 @@ components:
       - id
       type: object
       properties:
-        flights_url:
-          $ref: '#/components/schemas/RIDFlightsURL'
+        uss_base_url:
+          $ref: '#/components/schemas/FlightsUSSBaseURL'
         owner:
           description: Assigned by the DSS based on creating client’s ID (via access
             token).  Used for restricting mutation and deletion operations to owner.
@@ -1741,14 +1720,23 @@ components:
       - GroundObstacle
       - Other
       type: string
-    RIDFlightsURL:
-      anyOf:
-      - $ref: '#/components/schemas/URL'
+    USSBaseURL:
       description: |-
-        The URL at which the remote ID flights and their details may be retrieved.  See `/flights` and `/flights/{id}/details` paths for specification of this endpoint.
-        This URL is the base flights resource.  If this URL is specified as https://example.com/flights then the flight details for a particular {id} may be obtained at the URL https://example.com/flights/{id}/details.  This URL may not have a trailing / character.
+        The base URL of a USS implementation of part or all of the remote ID USS-USS API. Per the USS-USS API, the full URL
+        of a particular resource can be constructed by appending, e.g., `/uss/v1/{resource}/{id}` to this base URL.
+        Accordingly, this URL may not have a trailing '/' character.
       type: string
-      example: https://example.com/flights
+      example: https://example.com/rid
+    SubscriptionUSSBaseURL:
+      description: Base URL for the USS's implementation of the USS API, including
+        the POST identification_service_areas endpoint where notifications for this
+        Subscription will be received.
+      anyOf:
+      - $ref: '#/components/schemas/USSBaseURL'
+    FlightsUSSBaseURL:
+      description: Base URL for the USS's implementation of the USS API, including
+        the GET flights and GET flights/{id}/details endpoints where flight information
+        can be obtained.
   securitySchemes:
     AuthFromAuthorizationAuthority:
       flows:
