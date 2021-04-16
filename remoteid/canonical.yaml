@@ -1802,13 +1802,13 @@ components:
       description: |-
         Type of aircraft for the purposes of remote ID.
 
-        `VTOL` is a fixed wing aircraft that can take off vertically.  `Helicopter` includes multirotor.
+        `HybridLift` is a fixed wing aircraft that can take off vertically.  `Helicopter` includes multirotor.
       enum:
       - NotDeclared
       - Aeroplane
       - Helicopter
       - Gyroplane
-      - VTOL
+      - HybridLift
       - Ornithopter
       - Glider
       - Kite
