@@ -768,7 +768,49 @@ paths:
       in: path
       required: true
   /v2/uss/identification_service_areas/{id}:
-    summary: Notifications of change to Identification Service Areas.
+    get:
+      tags:
+      - p2p_rid
+      operationId: getIdentificationServiceAreaDetails
+      responses:
+        200:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/GetIdentificationServiceAreaDetailsResponse'
+          description: Details of the Identification Service Area were retrieved successfully.
+        400:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: One or more input parameters were missing or invalid.
+        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: Bearer access token was not provided in Authorization header,
+            token could not be decoded, or token was invalid.
+        403:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The access token was decoded successfully but did not include
+            a scope appropriate to this endpoint.
+        404:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ErrorResponse'
+          description: The requested Entity could not be found.
+      security:
+      - AuthFromAuthorizationAuthority:
+        - dss.read.identification_service_areas
+      summary: /uss/identification_service_areas/{id}
+      description: Retrieve details of an Identification Service Area owned by the
+        client.
     post:
       requestBody:
         content:
@@ -1485,13 +1527,23 @@ components:
           $ref: '#/components/schemas/RIDAircraftPosition'
     GetIdentificationServiceAreaResponse:
       description: Response to DSS request for the identification service area with
-        the given id.
+        the given ID.
       required:
       - service_area
       type: object
       properties:
         service_area:
           $ref: '#/components/schemas/IdentificationServiceArea'
+    GetIdentificationServiceAreaDetailsResponse:
+      description: Response to request for the details of an identification service
+        area with the given ID.
+      required:
+      - extents
+      type: object
+      properties:
+        extents:
+          $ref: '#/components/schemas/Volume4D'
+          description: The extents of the Identification Service Area.
     CreateIdentificationServiceAreaParameters:
       description: Parameters for a request to create an Identification Service Area
         in the DSS.
