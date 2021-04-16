@@ -902,7 +902,9 @@ components:
           description: A list of all flights that have been within the requested area
             within the remote ID retention period.  This includes flights that are
             not currently within the requested area, but were within the requested
-            area within the remote ID retention period.
+            area within the remote ID retention period.  Aircraft that are not in
+            flight, and have not been in flight within the retention period, should
+            not be included in this list.
           type: array
           items:
             $ref: '#/components/schemas/RIDFlight'
@@ -1237,13 +1239,28 @@ components:
           anyOf:
           - $ref: '#/components/schemas/RIDAircraftState'
           description: |-
-            The most up-to-date state of the aircraft.  Required when the aircraft is currently in the requested area unless `volumes` is specified.
+            The most up-to-date state of the aircraft.  Required when the aircraft is
+            currently in the requested area unless no telemetry is expected during during
+            the flight and `volumes` is specified.
 
-            If current data is not being received from the UAS by the Service Provider, the lack of change in this field is sufficient to indicate that current data is not being received.
+            If current data is not being received from the UAS by the Service Provider,
+            the lack of change in this field is sufficient to indicate that current
+            data is not being received.
+
+            If the USS believes a flight is airborne and expects to receive telemetry
+            at some point during the flight but has not yet received telemetry, this
+            field should be populated with the USS's best estimate of the position
+            of the flight with appropriate accuracy indications.
         volumes:
-          description: The set of spacetime volumes the aircraft is within.  Required,
+          description: |-
+            The set of spacetime volumes the aircraft is within.  Required,
             with 1 or more elements, if `current_state` is not specified.  The fields
             `time_start` and `time_end` are required if `current_state` is not specified.
+
+            If `current_state` is specified, this field should not be specified.
+            If `current_state` was available at any time during the flight, or is
+            expected to be available at any time during the flight, this field should
+            not be specified.
           type: array
           items:
             $ref: '#/components/schemas/Volume4D'
