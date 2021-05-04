@@ -74,7 +74,7 @@ paths:
           description: The requested area was too large.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
+        - rid.display_provider
       summary: /dss/identification_service_areas
       description: Retrieve all Identification Service Areas in the DAR for a given
         area during the given time.  Note that some Identification Service Areas returned
@@ -121,7 +121,7 @@ paths:
           description: The requested Entity could not be found.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
+        - rid.display_provider
       summary: /dss/identification_service_areas/{id}
       description: Retrieve full information of an Identification Service Area owned
         by the client.
@@ -181,7 +181,7 @@ paths:
           description: The area of the Identification Service Area is too large.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.write.identification_service_areas
+        - rid.service_provider
       summary: /dss/identification_service_areas/{id}
       description: |-
         Create a new Identification Service Area.  This call will fail if an Identification Service Area with the same ID already exists.
@@ -252,7 +252,7 @@ paths:
           description: The area of the Identification Service Area is too large.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.write.identification_service_areas
+        - rid.service_provider
       summary: /dss/identification_service_areas/{id}/{version}
       description: |-
         Update an Identification Service Area.  The full content of the existing Identification Service Area will be replaced with the provided information as only the most recent version is retained.
@@ -306,7 +306,7 @@ paths:
             * Despite repeated attempts, the DSS was unable to update the DAR because of other simultaneous changes.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.write.identification_service_areas
+        - rid.service_provider
       summary: /dss/identification_service_areas/{id}/{version}
       description: Delete an Identification Service Area.  USSs should not delete
         Identification Service Areas before the end of the last managed flight plus
@@ -369,7 +369,7 @@ paths:
           description: The requested view rectangle was too large.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
+        - rid.display_provider
       summary: /uss/flights
       description: Retrieve basic flight information from a remote ID service provider
         to meet remote ID requirements.  This endpoint will be polled by remote ID
@@ -439,7 +439,7 @@ paths:
           description: The requested flight could not be found.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
+        - rid.display_provider
       summary: /uss/flights/{id}/details
       description: Retrieve details of a flight from a remote ID service provider
         to meet remote ID requirements.
@@ -500,7 +500,7 @@ paths:
           description: The requested area was too large.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
+        - rid.display_provider
       summary: /dss/subscriptions
       description: |-
         Retrieve subscriptions intersecting an area of interest.  Subscription notifications are only triggered by (and contain full information of) changes to, creation of, or deletion of, Entities referenced by or stored in the DSS; they do not involve any data transfer (such as remote ID telemetry updates) apart from Entity information.
@@ -547,8 +547,8 @@ paths:
           description: A Subscription with the specified ID was not found.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
-        - dss.write.identification_service_areas
+        - rid.display_provider
+        - rid.service_provider
       summary: /dss/subscriptions/{id}
       description: Verify the existence/valdity and state of a particular subscription.
     put:
@@ -615,7 +615,7 @@ paths:
             a Subscription for each of their display client users' views.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
+        - rid.display_provider
       summary: /dss/subscriptions/{id}
       description: |-
         Create a subscription.  This call will fail if a Subscription with the same ID already exists.
@@ -695,7 +695,7 @@ paths:
             a Subscription for each of their display client users' views.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
+        - rid.display_provider
       summary: /dss/subscriptions/{id}/{version}
       description: |-
         Update a Subscription.  The full content of the existing Subscription will be replaced with the provided information as only the most recent version is retained.
@@ -749,7 +749,7 @@ paths:
             * Despite repeated attempts, the DSS was unable to update the DAR because of other simultaneous changes.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
+        - rid.display_provider
       summary: /dss/subscriptions/{id}/{version}
       description: Delete a subscription.
     parameters:
@@ -807,7 +807,7 @@ paths:
           description: The requested Entity could not be found.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.read.identification_service_areas
+        - rid.display_provider
       summary: /uss/identification_service_areas/{id}
       description: Retrieve details of an Identification Service Area owned by the
         client.
@@ -856,7 +856,7 @@ paths:
             a previously-received notification and the Entity is different.
       security:
       - AuthFromAuthorizationAuthority:
-        - dss.write.identification_service_areas
+        - rid.service_provider
       summary: /uss/identification_service_areas/{id}
       description: 'Hosted by a remote ID display provider using Subscriptions: publish
         new full information of an Identification Service Area to the host of this
@@ -1944,10 +1944,10 @@ components:
         clientCredentials:
           tokenUrl: https://example.com/oauth/token
           scopes:
-            dss.read.identification_service_areas: Client may query, read, or create
+            rid.display_provider: Client may query, read, or create
               subscriptions for Identification Service Areas for remote ID.  A remote
               ID display provider shall be granted this scope upon request.
-            dss.write.identification_service_areas: Client may create, edit, and delete
+            rid.service_provider: Client may create, edit, and delete
               Identification Service Areas for remote ID.  A remote ID service provider
               shall be granted this scope upon request.
       type: oauth2
@@ -1967,8 +1967,8 @@ components:
         Clients shall provide these access tokens in an `Authorization` header in the form `Bearer <token>` in accordance with RFC 6750.
 security:
 - AuthFromAuthorizationAuthority:
-  - dss.read.identification_service_areas
-  - dss.write.identification_service_areas
+  - rid.display_provider
+  - rid.service_provider
 tags:
 - name: dss
   description: Endpoints exposed by the DSS server.
