@@ -1409,7 +1409,7 @@ components:
             $ref: '#/components/schemas/SubscriptionState'
         extents:
           anyOf:
-            $ref: '#/components/schemas/Volume4D'
+            - $ref: '#/components/schemas/Volume4D'
           description: |-
             The new or updated extents of the Identification Service Area.
 
@@ -1653,7 +1653,8 @@ components:
       type: object
       properties:
         extents:
-          $ref: '#/components/schemas/Volume4D'
+          anyOf:
+          - $ref: '#/components/schemas/Volume4D'
           description: The extents of the Identification Service Area.
     CreateIdentificationServiceAreaParameters:
       description: Parameters for a request to create an Identification Service Area
