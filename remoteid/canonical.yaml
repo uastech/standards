@@ -1470,22 +1470,19 @@ components:
       type: string
       default: Undeclared
     SpecificSessionID:
-      description: A unique ID, typically temporary, to protect exposure of operationally
-        sensitive information and potentially to provide other benefits.
-      type: object
-      properties:
-        id:
-          type: string
-        scheme_id:
-          description: |-
-            Universally unique Session ID Scheme ID, an index into a registry of schemes, enabling resolution to the Serial Number by authorized parties only. Initial scheme registry entries shall include:
+      description: |-
+        A unique ID, typically temporary, to protect exposure of operationally
+        sensitive information and potentially to provide other benefits; the first
+        byte is the universally unique Session ID Scheme ID, an index into a registry of schemes, enabling resolution to the Serial Number by authorized parties only. Initial scheme registry entries shall include:
 
-            0 – reserved
-            1 – Internet Engineering Task Force (IETF) Drone Remote Identification Protocol (DRIP) entity ID
-            2 – IEEE 1609.2 HashedID8
-          type: number
-          format: integer
-          default: 0
+        0 – reserved
+        1 – Internet Engineering Task Force (IETF) Drone Remote Identification Protocol (DRIP) entity ID
+        2 – IEEE 1609.2 HashedID8
+
+        Expressed as a hexadecimal string of the underlying data bytes.  A recipient should ignore any dashes in this value.
+      type: string
+      example: 02-a1b2c3d4e5f60708
+      default: ''
     UASID:
       description: Identification of the UAS performing this flight.  Exactly one
         field of this object must be specified.
@@ -1791,7 +1788,6 @@ components:
       description: State of an aircraft for the purposes of remote ID.
       required:
       - timestamp
-      - timestamp_accuracy
       - accuracy_h
       - accuracy_v
       - position
@@ -1816,6 +1812,7 @@ components:
           minimum: 0
           exclusiveMinimum: false
           type: number
+          default: 0
         operational_status:
           $ref: '#/components/schemas/RIDOperationalStatus'
         position:
