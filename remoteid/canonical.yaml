@@ -1958,12 +1958,12 @@ components:
         clientCredentials:
           tokenUrl: https://example.com/oauth/token
           scopes:
-            rid.display_provider: Client may query, read, or create
-              subscriptions for Identification Service Areas for remote ID.  A remote
-              ID display provider shall be granted this scope upon request.
-            rid.service_provider: Client may create, edit, and delete
-              Identification Service Areas for remote ID.  A remote ID service provider
-              shall be granted this scope upon request.
+            rid.display_provider: Client may query, read, or create subscriptions
+              for Identification Service Areas for remote ID.  A remote ID display
+              provider shall be granted this scope upon request.
+            rid.service_provider: Client may create, edit, and delete Identification
+              Service Areas for remote ID.  A remote ID service provider shall be
+              granted this scope upon request.
       type: oauth2
       description: |-
         Authorization from, or on behalf of, an authorization authority.  This authority shall issue access tokens that are JSON Web Tokens as defined in RFC 7519, using the `RS256` algorithm for the signature, and publish to all providers the public key for verifying that signature.
