@@ -1014,9 +1014,23 @@ components:
       type: object
       properties:
         format:
-          description: Format of additional authentication data.
-          type: string
-          default: ''
+          description: |-
+            Format of additional authentication data.
+
+            0: None
+            1: UAS ID Signature
+            2: Operator ID Signature
+            3: Message Set Signature
+            4: Authentication Provided by Network Remote ID
+            5: Specific Method
+            6-9: Reserved for Spec
+            10-15: Available for Private Use
+          type: integer
+          default: 0
+          minimum: 0
+          exclusiveMinimum: false
+          maximum: 15
+          exclusiveMaximum: false
         data:
           description: Authentication data in form specified by `format`.
           type: string
@@ -1536,7 +1550,7 @@ components:
         altitude:
           anyOf:
           - $ref: '#/components/schemas/Altitude'
-          description: Altitude of UAS operator.
+          description: Geodetic altitude of UAS operator.
         altitude_type:
           description: Source of data for the altitude of the UAS operator.
           type: string
