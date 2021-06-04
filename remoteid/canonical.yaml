@@ -1485,7 +1485,7 @@ components:
       default: Undeclared
     SpecificSessionID:
       description: |-
-        A unique ID, typically temporary, to protect exposure of operationally
+        A unique 20-byte ID, typically temporary, to protect exposure of operationally
         sensitive information and potentially to provide other benefits; the first
         byte is the universally unique Session ID Scheme ID, an index into a registry of schemes, enabling resolution to the Serial Number by authorized parties only. Initial scheme registry entries shall include:
 
@@ -1493,7 +1493,7 @@ components:
         1 – Internet Engineering Task Force (IETF) Drone Remote Identification Protocol (DRIP) entity ID
         2 – IEEE 1609.2 HashedID8
 
-        Expressed as a hexadecimal string of the underlying data bytes.  A recipient should ignore any dashes in this value.
+        Expressed as a hexadecimal string of the underlying data bytes.  A recipient should ignore any dashes in this value.  If fewer than 20 bytes are specified, the remaining bytes at the end are assumed to have value 0.
       type: string
       example: 02-a1b2c3d4e5f60708
       default: ''
