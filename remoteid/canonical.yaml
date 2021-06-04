@@ -1498,21 +1498,10 @@ components:
       example: 02-a1b2c3d4e5f60708
       default: ''
     UASID:
-      description: Identification of the UAS performing this flight.  Exactly one
+      description: Identification of the UAS performing this flight.  At least one
         field of this object must be specified.
       type: object
-      required:
-      - uas_id_type
       properties:
-        uas_id_type:
-          description: Indication of which ID type contains the primary identification
-            of the UAS.
-          type: string
-          enum:
-          - SerialNumber
-          - RegistrationNumber
-          - UTMID
-          - SpecificSessionID
         serial_number:
           description: Can be specified when no registration ID exists and required
             by law in a region. This is expressed in the CTA-2063-A Serial Number
