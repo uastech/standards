@@ -4,6 +4,8 @@ info:
   version: 2.0.0
   description: |-
     Interface to Discovery and Synchronization Service and service providers used by participating clients to discover and inform other service providers.
+    [Github](https://github.com/uastech/standards/tree/astm_rid_api_2.0)
+    Note - Although the ASTM Specification is version 1.1, the version of the API (this YAML) is 2.0
 
     Unless otherwise specified, fields specified in a message but not declared in the API shall be ignored.
 paths:
