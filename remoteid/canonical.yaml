@@ -75,7 +75,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested area was too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/identification_service_areas
       description: Retrieve all Identification Service Areas in the DAR for a given
@@ -122,7 +122,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested Entity could not be found.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/identification_service_areas/{id}
       description: Retrieve full information of an Identification Service Area owned
@@ -182,7 +182,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The area of the Identification Service Area is too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.service_provider
       summary: /dss/identification_service_areas/{id}
       description: |-
@@ -253,7 +253,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The area of the Identification Service Area is too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.service_provider
       summary: /dss/identification_service_areas/{id}/{version}
       description: |-
@@ -307,7 +307,7 @@ paths:
             * The specified Identification Service Area's current version does not match the provided version.
             * Despite repeated attempts, the DSS was unable to update the DAR because of other simultaneous changes.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.service_provider
       summary: /dss/identification_service_areas/{id}/{version}
       description: Delete an Identification Service Area.  USSs should not delete
@@ -370,7 +370,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested view rectangle was too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /uss/flights
       description: Retrieve basic flight information from a remote ID service provider
@@ -440,7 +440,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested flight could not be found.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /uss/flights/{id}/details
       description: Retrieve details of a flight from a remote ID service provider
@@ -501,7 +501,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested area was too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/subscriptions
       description: |-
@@ -548,8 +548,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: A Subscription with the specified ID was not found.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
+      - Authority:
         - rid.service_provider
       summary: /dss/subscriptions/{id}
       description: Verify the existence/valdity and state of a particular subscription.
@@ -616,7 +617,7 @@ paths:
             likely be hit by, e.g., a large remote ID display provider that created
             a Subscription for each of their display client users' views.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/subscriptions/{id}
       description: |-
@@ -696,7 +697,7 @@ paths:
             likely be hit by, e.g., a large remote ID display provider that created
             a Subscription for each of their display client users' views.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/subscriptions/{id}/{version}
       description: |-
@@ -750,7 +751,7 @@ paths:
             * The specified Subscriptions's current version does not match the provided version.
             * Despite repeated attempts, the DSS was unable to update the DAR because of other simultaneous changes.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/subscriptions/{id}/{version}
       description: Delete a subscription.
@@ -808,7 +809,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested Entity could not be found.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /uss/identification_service_areas/{id}
       description: Retrieve details of an Identification Service Area owned by the
@@ -857,7 +858,7 @@ paths:
           description: The Entity version specified in this message is identical to
             a previously-received notification and the Entity is different.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.service_provider
       summary: /uss/identification_service_areas/{id}
       description: 'Hosted by a remote ID display provider using Subscriptions: publish
@@ -1945,7 +1946,7 @@ components:
       anyOf:
       - $ref: '#/components/schemas/USSBaseURL'
   securitySchemes:
-    AuthFromAuthorizationAuthority:
+    Authority:
       flows:
         clientCredentials:
           tokenUrl: https://example.com/oauth/token
@@ -1972,7 +1973,7 @@ components:
 
         Clients shall provide these access tokens in an `Authorization` header in the form `Bearer <token>` in accordance with RFC 6750.
 security:
-- AuthFromAuthorizationAuthority:
+- Authority:
   - rid.display_provider
   - rid.service_provider
 tags:
