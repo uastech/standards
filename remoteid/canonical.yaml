@@ -593,7 +593,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: |-
             * The access token was decoded successfully but did not include a scope appropriate to this endpoint or the request.
-            * An EntityType was specified in `types_filter` to which the scopes included in the access token do not provide access.
         409:
           content:
             application/json:
@@ -673,7 +672,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: |-
             * The access token was decoded successfully but did not include a scope appropriate to this endpoint or the request.
-            * An EntityType was specified in `types_filter` to which the scopes included in the access token do not provide access.
         409:
           content:
             application/json:
