@@ -334,7 +334,7 @@ paths:
       basic aircraft activity near a user in real time.
     get:
       tags:
-      - p2p_rid
+      - sp
       operationId: searchFlights
       responses:
         200:
@@ -404,7 +404,7 @@ paths:
     summary: A remote ID flight reported by a remote ID service provider.
     get:
       tags:
-      - p2p_rid
+      - sp
       operationId: getFlightDetails
       responses:
         200:
@@ -773,7 +773,7 @@ paths:
   /v2/uss/identification_service_areas/{id}:
     get:
       tags:
-      - p2p_rid
+      - sp
       operationId: getIdentificationServiceAreaDetails
       responses:
         200:
@@ -822,7 +822,7 @@ paths:
               $ref: '#/components/schemas/PutIdentificationServiceAreaNotificationParameters'
         required: true
       tags:
-      - p2p_rid
+      - dp
       operationId: postIdentificationServiceArea
       responses:
         204:
@@ -1979,5 +1979,7 @@ security:
 tags:
 - name: dss
   description: Endpoints exposed by the DSS server.
-- name: p2p_rid
+- name: sp
   description: Endpoints exposed by remote ID service providers for peer-peer communication.
+- name: dp
+  description: Endpoints exposed by remote ID display providers for peer-peer communication.
