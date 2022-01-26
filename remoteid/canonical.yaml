@@ -396,8 +396,8 @@ paths:
       schema:
         type: number
         format: float
-      minimum: 0
-      maximum: 60
+        minimum: 0
+        maximum: 60
       example: 60
       in: query
   /uss/flights/{id}/details:
@@ -871,17 +871,48 @@ paths:
       required: true
 components:
   schemas:
-    Volume3D:
-      description: A three-dimensional geographic volume consisting of a vertically-extruded
-        polygon.
+    Radius:
       required:
-      - footprint
+      - value
+      - units
       type: object
       properties:
-        footprint:
+        value:
+          format: float
+          description: >-
+            Distance from the centerpoint of a circular area, along the WGS84
+            ellipsoid.
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          example: 300.183
+        units:
+          type: string
+          description: >-
+            FIXM-compatible units.  Only meters ("M") are acceptable for UTM.
+          enum:
+          - M
+    Circle:
+      description: A circular area on the surface of the earth.
+      type: object
+      properties:
+        center:
+          $ref: '#/components/schemas/LatLngPoint'
+        radius:
+          $ref: '#/components/schemas/Radius'
+    Volume3D:
+      description: A three-dimensional geographic volume consisting of a vertically-extruded
+        planar shape.  Exactly one of outline_polygon or outline_circle must be populated.
+      type: object
+      properties:
+        outline_polygon:
           anyOf:
           - $ref: '#/components/schemas/GeoPolygon'
-          description: Projection of this volume onto the earth's surface.
+          description: Projection of this extruded polygonal volume onto the earth's surface.
+        outline_circle:
+          anyOf:
+          - $ref: '#/components/schemas/Circle'
+          description: Projection of this cylindrical volume onto the earth's surface.
         altitude_lo:
           anyOf:
           - $ref: '#/components/schemas/Altitude'
@@ -1047,7 +1078,7 @@ components:
           $ref: '#/components/schemas/RIDFlightDetails'
     HorizontalAccuracy:
       description: |-
-        This is the NACp enumeration from ADS-B, plus 1m for a more complete range for UAs.
+        This is based on ADS-B NACp (plus the one extra increment).
 
         `HAUnknown`: Unknown horizontal accuracy
 
@@ -1095,7 +1126,7 @@ components:
       default: HAUnknown
     VerticalAccuracy:
       description: |-
-        This is the GVA enumeration from ADS-B, plus some finer values for UAs.
+        This is based on ADS-B Geodetic Vertical Accuracy (GVA) (plus the three extra increments)
 
         `VAUnknown`: Unknown vertical accuracy
 
@@ -1144,7 +1175,7 @@ components:
           description: The Subscription which was deleted.
     SpeedAccuracy:
       description: |-
-        This is the same enumeration scale and values from ADS-B NACv.
+        Provides quality/containment on horizontal ground speed.
 
         `SAUnknown`: Unknown speed accuracy
 
@@ -1173,11 +1204,9 @@ components:
         lat:
           anyOf:
           - $ref: '#/components/schemas/Latitude'
-          default: 0
         lng:
           anyOf:
           - $ref: '#/components/schemas/Longitude'
-          default: 0
         alt:
           format: float
           description: 'Geodetic altitude (NOT altitude above launch, altitude above
@@ -1216,6 +1245,8 @@ components:
             m.
           type: number
           default: -1000
+        height:
+          $ref: '#/components/schemas/RIDHeight'
     GeoPolygonString:
       description: |-
         Plain-string representation of a geographic polygon consisting of at least three geographic points describing a closed polygon on the earth.  Each point consists of latitude,longitude in degrees.  Points are also comma-delimited, so this parameter will look like `lat1,lng1,lat2,lng2,lat3,lng3,...`  Latitude values must fall in the range [-90, 90] and longitude values must fall in the range [-180, 180].
@@ -1251,6 +1282,7 @@ components:
       exclusiveMinimum: false
       type: number
       example: 34.123
+      default: 0
     Longitude:
       format: double
       description: Degrees of longitude east of the Prime Meridian, with reference
@@ -1262,6 +1294,7 @@ components:
       exclusiveMinimum: false
       type: number
       example: -118.456
+      default: 0
     LatLngPoint:
       description: Point on the earth's surface.
       required:
@@ -1290,7 +1323,7 @@ components:
           $ref: '#/components/schemas/RIDFlightID'
         aircraft_type:
           anyOf:
-          - $ref: '#/components/schemas/RIDAircraftType'
+          - $ref: '#/components/schemas/UAType'
           description: Generic type of aircraft.
         current_state:
           anyOf:
@@ -1308,20 +1341,18 @@ components:
             at some point during the flight but has not yet received telemetry, this
             field should be populated with the USS's best estimate of the position
             of the flight with appropriate accuracy indications.
-        volumes:
+        operating_area:
           description: |-
-            The set of spacetime volumes the aircraft is within.  Required,
-            with 1 or more elements, if `current_state` is not specified.  The fields
-            `time_start` and `time_end` are required if `current_state` is not specified.
+            The area the aircraft is/are within.  Required, with 1 or more elements, if
+            `current_state` is not specified.  The fields `time_start` and `time_end` are
+            required.
 
             If `current_state` is specified, this field should not be specified.
             If `current_state` was available at any time during the flight, or is
             expected to be available at any time during the flight, this field should
             not be specified.
-          type: array
-          items:
-            $ref: '#/components/schemas/Volume4D'
-          default: []
+          anyOf:
+          - $ref: '#/components/schemas/OperatingArea'
         simulated:
           description: If specified as true, this flight is not a physical aircraft;
             it is just a simulation to test the system.
@@ -1337,6 +1368,22 @@ components:
           type: array
           items:
             $ref: '#/components/schemas/RIDRecentAircraftPosition'
+          default: []
+    OperatingArea:
+      description: Area of operation containing one or more aircraft participating in remote identification.
+      type: object
+      properties:
+        aircraft_count:
+          format: int32
+          description: Allows for operating a single UA, group, formation, or swarm. Quantity in Group.
+          minimum: 1
+          exclusiveMinimum: false
+          type: integer
+        volumes:
+          description: The area where a group or Intent-Based Network Participant operation is planned or taking place.
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatingArea'
           default: []
     GeoPolygon:
       description: |-
@@ -1476,19 +1523,26 @@ components:
           - $ref: '#/components/schemas/Subscription'
           description: Result of the operation on the subscription.
     RIDOperationalStatus:
-      description: Indicates operational status of associated aircraft.
+      description: |-
+        Operational Status indicates whether the associated UA is on the ground, airborne, or in an
+        emergency situation, or the Remote ID system has failed. The emergency status takes
+        precedence over the other status modes. This status can be used for filtering purposes.
       enum:
       - Undeclared
       - Ground
       - Airborne
       - Emergency
+      - RemoteIDSystemFailure
       type: string
       default: Undeclared
     SpecificSessionID:
       description: |-
-        A unique 20-byte ID, typically temporary, to protect exposure of operationally
-        sensitive information and potentially to provide other benefits; the first
-        byte is the universally unique Session ID Scheme ID, an index into a registry of schemes, enabling resolution to the Serial Number by authorized parties only. Initial scheme registry entries shall include:
+        A unique 20 byte ID intended to identify a specific flight (session) while providing a
+        greater level of privacy to the operator. The first byte is the registered unique Specific Session ID
+        Type maintained by a registrar (see Annex A5), and the remaining 19 bytes is the Session ID per the
+        Specific Session ID Type specification.
+
+        Initial scheme registry entries include:
 
         0 – reserved
         1 – Internet Engineering Task Force (IETF) Drone Remote Identification Protocol (DRIP) entity ID
@@ -1504,56 +1558,51 @@ components:
       type: object
       properties:
         serial_number:
-          description: Can be specified when no registration ID exists and required
-            by law in a region. This is expressed in the CTA-2063-A Serial Number
-            format.
+          description: This is expressed in the CTA-2063-A Serial Number format.
           type: string
           example: INTCJ123-4567-890
           default: ''
-        registration_number:
+        registration_id:
           description: If a CAA provides a method of registering UAS, this number
-            is provided by the CAA or its authorized representative.
+            is provided by the CAA or its authorized representative.  Format is
+            <ICAO Nationality MarkA>.<CAA Assigned ID>, ASCII encoded, only
+            uppercase letters (A-Z), dot (.), and digits (0-9) are allowed.
+            Example is valid for the US.
           type: string
-          example: FA12345897
+          example: N.123456
           default: ''
         utm_id:
-          description: A UTM-provided unique ID traceable to a non-obfuscated ID that
-            can act like a "session id" to protect exposure of operationally sensitive
-            information.
+          description: A UTM-provided universally unique ID traceable to a
+            non-obfuscated ID that acts as a "session id" to protect exposure of
+            operationally sensitive information.
           type: string
           example: ae1fa066-6d68-4018-8274-af867966978e
           default: ''
         specific_session_id:
           $ref: '#/components/schemas/SpecificSessionID'
     OperatorLocation:
-      description: Location of UAS operator.
+      description: Location associated with the Remote Pilot
       type: object
       required:
       - position
-      - altitude
-      - altitude_type
       properties:
         position:
           anyOf:
           - $ref: '#/components/schemas/LatLngPoint'
-          description: Position of UAS operator.
+          description: Position of the Remote Pilot.
         altitude:
           anyOf:
           - $ref: '#/components/schemas/Altitude'
-          description: Geodetic altitude of UAS operator.
+          description: Provides the Operator Altitude based on WGS-84 height above ellipsoid (HAE)
+            (See Geodetic Altitude).  This value is provided in meters and must have a minimum
+            resolution of 1 m.
         altitude_type:
-          description: Source of data for the altitude of the UAS operator.
+          description: Source of data for the altitude field.
           type: string
           enum:
-          - TakeOff
-          - LiveGNSS
-          - FixedLocation
-    ClassificationType:
-      type: string
-      enum:
-      - Undeclared
-      - EuropeanUnion
-      default: Undeclared
+          - Takeoff
+          - Dynamic
+          - Fixed
     UAClassificationEU:
       type: object
       properties:
@@ -1591,16 +1640,20 @@ components:
           example: a3423b-213401-0023
         eu_classification:
           description: When this field is specified, the Classification Type is "European
-            Union".  Otherwise, the Classification Type is "Undeclared".
+            Union".  If no other classification field is specified, the Classification Type
+            is "Undeclared".
           anyOf:
           - $ref: '#/components/schemas/UAClassificationEU'
         uas_id:
           $ref: '#/components/schemas/UASID'
         operator_id:
-          description: CAA-issued registration/license ID for the remote pilot or
-            operator.
+          description: This optional field provides a CAA-issued registration/license ID for the
+            remote pilot or operator. Format is <ICAO Nationality MarkA>.<CAA Assigned ID>, ASCII
+            encoded, only uppercase letters (A-Z), dot (.), and digits (0-9) are allowed. Example
+            is valid for the US.
           type: string
           default: ''
+          example: N.OP123456
         operator_location:
           $ref: '#/components/schemas/OperatorLocation'
         operation_description:
@@ -1718,7 +1771,7 @@ components:
           $ref: '#/components/schemas/SubscriptionUSSBaseURL'
     Subscription:
       description: Specification of a geographic area that a client is interested
-        in on an ongoing basis (e.g., “planning area”).  Internal to the DSS.
+        in on an ongoing basis (e.g., "planning area").  Internal to the DSS.
       required:
       - id
       - uss_base_url
@@ -1793,9 +1846,9 @@ components:
       description: State of an aircraft for the purposes of remote ID.
       required:
       - timestamp
-      - accuracy_h
-      - accuracy_v
+      - timestamp_accuracy
       - position
+      - speed_accuracy
       type: object
       properties:
         timestamp:
@@ -1825,8 +1878,9 @@ components:
         track:
           format: float
           description: Direction of flight expressed as a "True North-based" ground
-            track angle.  This value is provided in degrees East of North with a minimum
-            resolution of 1 degree.  A value of 360 indicates invalid, no value, or
+            track angle.  This value is provided in clockwise degrees with a minimum
+            resolution of 1 degree.  If aircraft is not moving horizontally, use the
+            "Unknown" value.  A value of 361 indicates invalid, no value, or
             unknown.
           maximum: 361
           exclusiveMaximum: false
@@ -1846,7 +1900,7 @@ components:
         speed_accuracy:
           anyOf:
           - $ref: '#/components/schemas/SpeedAccuracy'
-          description: Accuracy of horizontal ground speed.
+          description: Provides quality/containment on horizontal ground speed.
         vertical_speed:
           format: float
           description: Speed up (vertically) WGS84-HAE, m/s.  Invalid, No Value, or
@@ -1854,55 +1908,15 @@ components:
           type: number
           example: 0.2
           default: 63
-        height:
-          $ref: '#/components/schemas/RIDHeight'
-        group_radius:
-          format: float
-          description: Farthest horizontal distance from reported group location at
-            which an aircraft in the group may be located (meters).  This value contains
-            the "Operating Area Radius" data from the common data dictionary when
-            group operation area is specified by point-radius.
-          minimum: 0
-          exclusiveMinimum: true
-          type: number
-        group_ceiling:
-          format: float
-          description: Maximum altitude (meters WGS84-HAE) of Group Operation.  This
-            value contains the "Operating Area Ceiling" data from the common data
-            dictionary when group operation area is specified by point-radius.  Invalid,
-            No Value, or Unknown is –1000 m.
-          type: number
-        group_floor:
-          format: float
-          description: Minimum altitude (meters WGS84-HAE) of Group Operation.  If
-            not specified, ground level shall be assumed.  This value contains the
-            "Operating Area Floor" data from the common data dictionary when group
-            operation area is specified by point-radius.  Invalid, No Value, or Unknown
-            is –1000 m.
-          type: number
-        group_count:
-          format: int32
-          description: When operating a group (or formation or swarm), number of aircraft
-            in group.  This value contains the "Operating Area Count" data from the
-            common data dictionary when group operation area is specified by point-radius.
-          minimum: 1
-          exclusiveMinimum: false
-          type: integer
-        group_time_start:
-          format: date-time
-          description: Time at which a group operation starts.  This value contains
-            the "Operation Area Start" data from the common data dictionary when group
-            operation area is specified by point-radius.
-          type: string
-        group_time_end:
-          format: date-time
-          description: Time at which a group operation starts.  This value contains
-            the "Operation Area End" data from the common data dictionary when group
-            operation area is specified by point-radius.
-          type: string
-    RIDAircraftType:
+    UAType:
       description: |-
-        Type of aircraft for the purposes of remote ID.
+        The UA Type can help infer performance, speed, and duration of flights, for example, a
+        "fixed wing" can generally fly in a forward direction only (as compared to a multi-rotor).
+        This can also help differentiate aircraft types without sharing operationally sensitive
+        information like the make and model of a particular aircraft. Make and model are
+        anticipated to become available during the Registration ID lookup process. UAS Type is also
+        useful for correlating visual observation with data received. The types were formulated
+        based on unique flight characteristics.
 
         `HybridLift` is a fixed wing aircraft that can take off vertically.  `Helicopter` includes multirotor.
       enum:
