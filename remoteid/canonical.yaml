@@ -5,9 +5,14 @@ info:
   description: |-
     Interface to Discovery and Synchronization Service and service providers used by participating clients to discover and inform other service providers.
     [Github](https://github.com/uastech/standards/tree/astm_rid_api_2.1)
-    Note - Although the ASTM Specification is version 1.1, the version of the API (this YAML) is 2.1
 
-    Unless otherwise specified, fields specified in a message but not declared in the API shall be ignored.
+    Although the ASTM Specification is version 1.1, the version of the API (this YAML) is 2.1
+
+    Unless otherwise specified, fields specified in a message but not declared
+    in the API must be ignored.
+
+    Whenever a object-type field may be omitted, it may also be set to null for
+    the same effect.
 paths:
   /dss/identification_service_areas:
     summary: Set of Identification Service Areas in the DSS.
@@ -28,6 +33,7 @@ paths:
       - name: earliest_time
         description: If specified, indicates non-interest in any Identification Service
           Areas that end before this time.  RFC 3339 format, per OpenAPI specification.
+          The time zone must be 'Z'.
         schema:
           format: date-time
           type: string
@@ -36,6 +42,7 @@ paths:
       - name: latest_time
         description: If specified, indicates non-interest in any Identification Service
           Areas that start after this time.  RFC 3339 format, per OpenAPI specification.
+          The time zone must be 'Z'.
         schema:
           format: date-time
           type: string
@@ -871,6 +878,22 @@ paths:
       required: true
 components:
   schemas:
+    Time:
+      required:
+      - value
+      - format
+      type: object
+      properties:
+        value:
+          type: string
+          description: >-
+            RFC3339-formatted time/date string.  The time zone must be 'Z'.
+          format: date-time
+          example: '1985-04-12T23:20:50.52Z'
+        format:
+          type: string
+          enum:
+          - RFC3339
     Radius:
       required:
       - value
@@ -901,47 +924,48 @@ components:
         radius:
           $ref: '#/components/schemas/Radius'
     Volume3D:
-      description: A three-dimensional geographic volume consisting of a vertically-extruded
-        planar shape.  Exactly one of outline_polygon or outline_circle must be populated.
+      description: >-
+        A three-dimensional geographic volume consisting of a
+        vertically-extruded shape. Exactly one outline must be specified.
       type: object
       properties:
-        outline_polygon:
-          anyOf:
-          - $ref: '#/components/schemas/GeoPolygon'
-          description: Projection of this extruded polygonal volume onto the earth's surface.
         outline_circle:
           anyOf:
           - $ref: '#/components/schemas/Circle'
-          description: Projection of this cylindrical volume onto the earth's surface.
-        altitude_lo:
+          description: A circular geographic shape on the surface of the earth.
+        outline_polygon:
+          anyOf:
+          - $ref: '#/components/schemas/Polygon'
+          description: >-
+            A polygonal geographic shape on the surface of the earth.
+        altitude_lower:
+          description: >-
+            Minimum bounding altitude of this volume. Must be less than
+            altitude_upper, if specified.
           anyOf:
           - $ref: '#/components/schemas/Altitude'
-          description: Minimum bounding altitude of this volume.
-        altitude_hi:
+        altitude_upper:
+          description: >-
+            Maximum bounding altitude of this volume. Must be greater than
+            altitude_lower, if specified.
           anyOf:
           - $ref: '#/components/schemas/Altitude'
-          description: Maximum bounding altitude of this volume.
     Volume4D:
       description: Contiguous block of geographic spacetime.
       required:
-      - spatial_volume
+      - volume
       type: object
       properties:
-        spatial_volume:
-          anyOf:
-          - $ref: '#/components/schemas/Volume3D'
-          description: Constant spatial extent of this volume.
+        volume:
+          $ref: '#/components/schemas/Volume3D'
         time_start:
-          format: date-time
-          description: Beginning time of this volume.  RFC 3339 format, per OpenAPI
-            specification.
-          type: string
-          default: ''
+          description: Beginning time of this volume. Must be before time_end.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         time_end:
-          format: date-time
-          description: End time of this volume.  RFC 3339 format, per OpenAPI specification.
-          type: string
-          default: ''
+          description: End time of this volume. Must be after time_start.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
     GetSubscriptionResponse:
       description: Response to DSS request for the subscription with the given id.
       required:
@@ -968,10 +992,10 @@ components:
       type: object
       properties:
         timestamp:
-          format: date-time
           description: The remote ID service provider's timestamp for when this information
-            was current.  RFC 3339 format, per OpenAPI specification.
-          type: string
+            was current.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         flights:
           description: A list of all flights that have been within the requested area
             within the remote ID retention period.  This includes flights that are
@@ -1249,9 +1273,13 @@ components:
           $ref: '#/components/schemas/RIDHeight'
     GeoPolygonString:
       description: |-
-        Plain-string representation of a geographic polygon consisting of at least three geographic points describing a closed polygon on the earth.  Each point consists of latitude,longitude in degrees.  Points are also comma-delimited, so this parameter will look like `lat1,lng1,lat2,lng2,lat3,lng3,...`  Latitude values must fall in the range [-90, 90] and longitude values must fall in the range [-180, 180].
+        Plain-string representation of a geographic polygon consisting of at least three geographic
+        points describing a closed polygon on the earth.  Each point consists of latitude,longitude
+        in degrees.  Points are also comma-delimited, so this parameter will look like
+        `lat1,lng1,lat2,lng2,lat3,lng3,...`  Latitude values must fall in the range [-90, 90] and
+        longitude values must fall in the range [-180, 180].
 
-        All of the requirements and clarifications for GeoPolygon apply to GeoPolygonString as well.
+        All of the requirements and clarifications for Polygon apply to GeoPolygonString as well.
       type: string
     RIDHeight:
       description: A relative altitude for the purposes of remote ID.
@@ -1307,11 +1335,43 @@ components:
         lat:
           $ref: '#/components/schemas/Latitude'
     Altitude:
-      format: float
-      description: An altitude, in meters, above the WGS84 ellipsoid.  Invalid, No
-        Value, or Unknown is –1000 m.
-      type: number
-      example: 19.5
+      type: object
+      required:
+      - value
+      - reference
+      - units
+      properties:
+        value:
+          description: >-
+            The numeric value of the altitude. Note that min and max values are
+            added as a sanity check. As use cases evolve and more options are
+            made available in terms of units of measure or reference systems,
+            these bounds may be re-evaluated. Invalid, No Value, or Unknown is
+            –1000 m.
+          type: number
+          format: double
+          minimum: -8000
+          exclusiveMinimum: false
+          maximum: 100000
+          exclusiveMaximum: false
+          example: 19.5
+        reference:
+          description: >-
+            A code indicating the reference for a vertical distance. See AIXM
+            5.1 and FIXM 4.2.0. Currently, UTM only allows WGS84 with no
+            immediate plans to allow other options. FIXM and AIXM allow for
+            'SFC' which is equivalent to AGL.
+          type: string
+          enum:
+          - W84
+        units:
+          description: >-
+            The reference quantities used to express the value of altitude. See
+            FIXM 4.2. Currently, UTM only allows meters with no immediate plans
+            to allow other options.
+          type: string
+          enum:
+          - M
     RIDFlight:
       description: Description of a remote ID flight.
       required:
@@ -1385,14 +1445,17 @@ components:
           items:
             $ref: '#/components/schemas/OperatingArea'
           default: []
-    GeoPolygon:
-      description: |-
-        An enclosed area on the earth.
-        The bounding edges of this polygon shall be the shortest paths between connected vertices.  This means, for instance, that the edge between two points both defined at a particular latitude is not generally contained at that latitude.
-        The winding order shall be interpreted as the order which produces the smaller area.
-        The path between two vertices shall be the shortest possible path between those vertices.
-        Edges may not cross.
-        Vertices may not be duplicated.  In particular, the final polygon vertex shall not be identical to the first vertex.
+    Polygon:
+      description: >-
+        An enclosed area on the earth. The bounding edges of this polygon are
+        defined to be the shortest paths between connected vertices.  This
+        means, for instance, that the edge between two points both defined at a
+        particular latitude is not generally contained at that latitude. The
+        winding order must be interpreted as the order which produces the
+        smaller area. The path between two vertices is defined to be the
+        shortest possible path between those vertices. Edges may not cross.
+        Vertices may not be duplicated.  In particular, the final polygon vertex
+        must not be identical to the first vertex.
       required:
       - vertices
       type: object
@@ -1673,10 +1736,9 @@ components:
       type: object
       properties:
         time:
-          format: date-time
-          description: Time at which this position applied.  RFC 3339 format, per
-            OpenAPI specification.
-          type: string
+          description: Time at which this position applied.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         position:
           $ref: '#/components/schemas/RIDAircraftPosition'
     GetIdentificationServiceAreaResponse:
@@ -1795,17 +1857,15 @@ components:
           - $ref: '#/components/schemas/SubscriptionNotificationIndex'
           default: 0
         time_end:
-          format: date-time
           description: If set, this subscription will be automatically removed after
-            this time.  RFC 3339 format, per OpenAPI specification.
-          type: string
-          default: ''
+            this time.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         time_start:
-          format: date-time
           description: If set, this Subscription will not generate any notifications
-            before this time.  RFC 3339 format, per OpenAPI specification.
-          type: string
-          default: ''
+            before this time.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         version:
           $ref: '#/components/schemas/Version'
     IdentificationServiceArea:
@@ -1829,13 +1889,13 @@ components:
           type: string
           example: myuss
         time_start:
-          format: date-time
-          description: Beginning time of service.  RFC 3339 format, per OpenAPI specification.
-          type: string
+          description: Beginning time of service.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         time_end:
-          format: date-time
-          description: End time of service.  RFC 3339 format, per OpenAPI specification.
-          type: string
+          description: End time of service.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         version:
           $ref: '#/components/schemas/Version'
         id:
@@ -1852,13 +1912,12 @@ components:
       type: object
       properties:
         timestamp:
-          format: date-time
           description: Time at which this state was valid.  This may be the time coming
             from the source, such as a GPS, or the time when the system computes the
             values using an algorithm such as an Extended Kalman Filter (EKF).  Timestamp
-            must be expressed with a minimum resolution of 1/10th of a second.  RFC
-            3339 format, per OpenAPI specification.
-          type: string
+            must be expressed with a minimum resolution of 1/10th of a second.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         timestamp_accuracy:
           format: float
           description: 'Declaration of timestamp accuracy, which is the largest difference
@@ -1941,7 +2000,7 @@ components:
     USSBaseURL:
       description: |-
         The base URL of a USS implementation of part or all of the remote ID USS-USS API. Per the USS-USS API, the full URL
-        of a particular resource can be constructed by appending, e.g., `/uss/v1/{resource}/{id}` to this base URL.
+        of a particular resource can be constructed by appending, e.g., `/uss/{resource}/{id}` to this base URL.
         Accordingly, this URL may not have a trailing '/' character.
       type: string
       example: https://example.com/rid
@@ -1961,29 +2020,56 @@ components:
     Authority:
       flows:
         clientCredentials:
-          tokenUrl: https://example.com/oauth/token
+          tokenUrl: https://auth.example.com/oauth/token
           scopes:
             rid.display_provider: Client may query, read, or create subscriptions
               for Identification Service Areas for remote ID.  A remote ID display
-              provider shall be granted this scope upon request.
+              provider should be granted this scope upon request.
             rid.service_provider: Client may create, edit, and delete Identification
-              Service Areas for remote ID.  A remote ID service provider shall be
-              granted this scope upon request.
+              Service Areas for remote ID.  A remote ID service provider should
+              be granted this scope upon request.
       type: oauth2
-      description: |-
-        Authorization from, or on behalf of, an authorization authority.  This authority shall issue access tokens that are JSON Web Tokens as defined in RFC 7519, using the `RS256` algorithm for the signature, and publish to all providers the public key for verifying that signature.
+      description: >-
+        Authorization from, or on behalf of, an authorization authority.  This
+        authority will issue access tokens that are JSON Web Tokens as defined
+        in RFC 7519, using the `RS256` algorithm for the signature, publish to
+        all providers the public key for verifying that signature, and implement
+        standard OAuth server discovery mechanisms as described in RFC 8414.
 
-        The following fields shall be included in the JWT claim for access tokens issued by this authority:
-        * `iss`, with the URL at which the token generation request was received.
+        The following fields must be included in the JWT claim for access tokens
+        issued by this authority:
+
+        * `iss`, with the URL at which the token generation request was
+        received.
+
         * `exp`, with a time no further than 1 hour in the future.
+
         * `sub`, with unique ID of the client requesting the access token.
-        * `scope`, with a string composed of a space-separated list of strings indicating the scopes granted, per RFC 6749.
 
-        Multiple scopes for a single token shall be granted if requested.  The tokens granted by this authority shall protect against reuse of received tokens to impersonate the sender to other recipients (via use of the `aud` claim or other means).
+        * `scope`, with a string composed of a space-separated list of strings
+        indicating the scopes granted, per RFC 6749.
 
-        When using the `aud` claim to protect against the reuse of received tokens, and absent guidance on behalf of the competent authority to the contrary, the JWT `aud` claim requested by the client shall be included in each access token and shall contain the fully qualified domain name of the URL the access token will be used to access.  For example, if a USS were querying the endpoint at https://dss.example.com:8888/rid/dss/identification_service_areas, the access token included in the request should specify `"aud": "dss.example.com"`.
+        * `jti`, according to RFC 7519.
 
-        Clients shall provide these access tokens in an `Authorization` header in the form `Bearer <token>` in accordance with RFC 6750.
+        Following the principle of least privilege, only one of the scopes
+        enumerated in this document should usually be granted in a single token
+        (though other scopes may accompany it).  The tokens granted by this
+        authority must protect against reuse of received tokens to impersonate
+        the sender to other recipients (via use of the `aud` claim or other
+        means).
+
+        When using the `aud` claim to protect against the reuse of received
+        tokens, and absent guidance on behalf of the competent authority to the
+        contrary, the JWT `aud` claim requested by the client must be included
+        in each access token and must contain the fully qualified domain name of
+        the URL the access token will be used to access.  For example, if a USS
+        were querying the endpoint at
+        https://dss.example.com:8888/rid/v2/dss/identification_service_areas,
+        the access token included in the request should specify `"aud":
+        "dss.example.com"`.
+
+        Clients must provide these access tokens in an `Authorization` header in
+        the form `Bearer <token>` in accordance with RFC 6750.
 security:
 - Authority:
   - rid.display_provider
