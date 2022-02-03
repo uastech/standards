@@ -2064,7 +2064,7 @@ components:
         in each access token and must contain the fully qualified domain name of
         the URL the access token will be used to access.  For example, if a USS
         were querying the endpoint at
-        https://dss.example.com:8888/rid/v2/dss/identification_service_areas,
+        https://dss.example.com:8888/rid/dss/identification_service_areas,
         the access token included in the request should specify `"aud":
         "dss.example.com"`.
 
