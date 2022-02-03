@@ -1,15 +1,20 @@
 openapi: 3.0.2
 info:
   title: Standard Remote ID API Interfaces
-  version: 2.0.0
+  version: 2.1.0
   description: |-
     Interface to Discovery and Synchronization Service and service providers used by participating clients to discover and inform other service providers.
-    [Github](https://github.com/uastech/standards/tree/astm_rid_api_2.0)
-    Note - Although the ASTM Specification is version 1.1, the version of the API (this YAML) is 2.0
+    [Github](https://github.com/uastech/standards/tree/astm_rid_api_2.1)
 
-    Unless otherwise specified, fields specified in a message but not declared in the API shall be ignored.
+    Although the ASTM Specification is version 1.1, the version of the API (this YAML) is 2.1
+
+    Unless otherwise specified, fields specified in a message but not declared
+    in the API must be ignored.
+
+    Whenever a object-type field may be omitted, it may also be set to null for
+    the same effect.
 paths:
-  /v2/dss/identification_service_areas:
+  /dss/identification_service_areas:
     summary: Set of Identification Service Areas in the DSS.
     description: ''
     get:
@@ -28,6 +33,7 @@ paths:
       - name: earliest_time
         description: If specified, indicates non-interest in any Identification Service
           Areas that end before this time.  RFC 3339 format, per OpenAPI specification.
+          The time zone must be 'Z'.
         schema:
           format: date-time
           type: string
@@ -36,6 +42,7 @@ paths:
       - name: latest_time
         description: If specified, indicates non-interest in any Identification Service
           Areas that start after this time.  RFC 3339 format, per OpenAPI specification.
+          The time zone must be 'Z'.
         schema:
           format: date-time
           type: string
@@ -75,13 +82,13 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested area was too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/identification_service_areas
       description: Retrieve all Identification Service Areas in the DAR for a given
         area during the given time.  Note that some Identification Service Areas returned
         may lie entirely outside the requested area.
-  /v2/dss/identification_service_areas/{id}:
+  /dss/identification_service_areas/{id}:
     summary: An Identification Service Area in the DSS.
     get:
       tags:
@@ -122,7 +129,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested Entity could not be found.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/identification_service_areas/{id}
       description: Retrieve full information of an Identification Service Area owned
@@ -182,7 +189,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The area of the Identification Service Area is too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.service_provider
       summary: /dss/identification_service_areas/{id}
       description: |-
@@ -196,7 +203,7 @@ paths:
         $ref: '#/components/schemas/EntityUUID'
       in: path
       required: true
-  /v2/dss/identification_service_areas/{id}/{version}:
+  /dss/identification_service_areas/{id}/{version}:
     summary: A specific version of an Identification Service Area in the DSS.
     put:
       requestBody:
@@ -253,7 +260,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The area of the Identification Service Area is too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.service_provider
       summary: /dss/identification_service_areas/{id}/{version}
       description: |-
@@ -307,7 +314,7 @@ paths:
             * The specified Identification Service Area's current version does not match the provided version.
             * Despite repeated attempts, the DSS was unable to update the DAR because of other simultaneous changes.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.service_provider
       summary: /dss/identification_service_areas/{id}/{version}
       description: Delete an Identification Service Area.  USSs should not delete
@@ -328,13 +335,13 @@ paths:
         type: string
       in: path
       required: true
-  /v2/uss/flights:
+  /uss/flights:
     summary: Basic operation details to meet remote ID requirements.
     description: This endpoint may be polled by remote ID display providers to display
       basic aircraft activity near a user in real time.
     get:
       tags:
-      - p2p_rid
+      - sp
       operationId: searchFlights
       responses:
         200:
@@ -370,7 +377,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested view rectangle was too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /uss/flights
       description: Retrieve basic flight information from a remote ID service provider
@@ -396,15 +403,15 @@ paths:
       schema:
         type: number
         format: float
-      minimum: 0
-      maximum: 60
+        minimum: 0
+        maximum: 60
       example: 60
       in: query
-  /v2/uss/flights/{id}/details:
+  /uss/flights/{id}/details:
     summary: A remote ID flight reported by a remote ID service provider.
     get:
       tags:
-      - p2p_rid
+      - sp
       operationId: getFlightDetails
       responses:
         200:
@@ -440,7 +447,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested flight could not be found.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /uss/flights/{id}/details
       description: Retrieve details of a flight from a remote ID service provider
@@ -453,7 +460,7 @@ paths:
         $ref: '#/components/schemas/RIDFlightID'
       in: path
       required: true
-  /v2/dss/subscriptions:
+  /dss/subscriptions:
     summary: Subscriptions for airspace updates to a volume of interest.
     get:
       tags:
@@ -501,14 +508,14 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested area was too large.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/subscriptions
       description: |-
         Retrieve subscriptions intersecting an area of interest.  Subscription notifications are only triggered by (and contain full information of) changes to, creation of, or deletion of, Entities referenced by or stored in the DSS; they do not involve any data transfer (such as remote ID telemetry updates) apart from Entity information.
 
         Only Subscriptions belonging to the caller are returned.  This endpoint would be used if a USS lost track of Subscriptions they had created and/or wanted to resolve an error indicating that they had too many existing Subscriptions in an area.
-  /v2/dss/subscriptions/{id}:
+  /dss/subscriptions/{id}:
     summary: Subscription for airspace updates to a volume of interest.
     get:
       tags:
@@ -548,8 +555,9 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: A Subscription with the specified ID was not found.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
+      - Authority:
         - rid.service_provider
       summary: /dss/subscriptions/{id}
       description: Verify the existence/valdity and state of a particular subscription.
@@ -592,7 +600,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: |-
             * The access token was decoded successfully but did not include a scope appropriate to this endpoint or the request.
-            * An EntityType was specified in `types_filter` to which the scopes included in the access token do not provide access.
         409:
           content:
             application/json:
@@ -616,7 +623,7 @@ paths:
             likely be hit by, e.g., a large remote ID display provider that created
             a Subscription for each of their display client users' views.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/subscriptions/{id}
       description: |-
@@ -630,7 +637,7 @@ paths:
         $ref: '#/components/schemas/SubscriptionUUID'
       in: path
       required: true
-  /v2/dss/subscriptions/{id}/{version}:
+  /dss/subscriptions/{id}/{version}:
     summary: Specific version of a Subscription for airspace updates to a volume of
       interest.
     put:
@@ -672,7 +679,6 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: |-
             * The access token was decoded successfully but did not include a scope appropriate to this endpoint or the request.
-            * An EntityType was specified in `types_filter` to which the scopes included in the access token do not provide access.
         409:
           content:
             application/json:
@@ -696,7 +702,7 @@ paths:
             likely be hit by, e.g., a large remote ID display provider that created
             a Subscription for each of their display client users' views.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/subscriptions/{id}/{version}
       description: |-
@@ -750,7 +756,7 @@ paths:
             * The specified Subscriptions's current version does not match the provided version.
             * Despite repeated attempts, the DSS was unable to update the DAR because of other simultaneous changes.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /dss/subscriptions/{id}/{version}
       description: Delete a subscription.
@@ -769,10 +775,10 @@ paths:
         type: string
       in: path
       required: true
-  /v2/uss/identification_service_areas/{id}:
+  /uss/identification_service_areas/{id}:
     get:
       tags:
-      - p2p_rid
+      - sp
       operationId: getIdentificationServiceAreaDetails
       responses:
         200:
@@ -808,7 +814,7 @@ paths:
                 $ref: '#/components/schemas/ErrorResponse'
           description: The requested Entity could not be found.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.display_provider
       summary: /uss/identification_service_areas/{id}
       description: Retrieve details of an Identification Service Area owned by the
@@ -821,7 +827,7 @@ paths:
               $ref: '#/components/schemas/PutIdentificationServiceAreaNotificationParameters'
         required: true
       tags:
-      - p2p_rid
+      - dp
       operationId: postIdentificationServiceArea
       responses:
         204:
@@ -857,7 +863,7 @@ paths:
           description: The Entity version specified in this message is identical to
             a previously-received notification and the Entity is different.
       security:
-      - AuthFromAuthorizationAuthority:
+      - Authority:
         - rid.service_provider
       summary: /uss/identification_service_areas/{id}
       description: 'Hosted by a remote ID display provider using Subscriptions: publish
@@ -872,46 +878,94 @@ paths:
       required: true
 components:
   schemas:
-    Volume3D:
-      description: A three-dimensional geographic volume consisting of a vertically-extruded
-        polygon.
+    Time:
       required:
-      - footprint
+      - value
+      - format
       type: object
       properties:
-        footprint:
+        value:
+          type: string
+          description: >-
+            RFC3339-formatted time/date string.  The time zone must be 'Z'.
+          format: date-time
+          example: '1985-04-12T23:20:50.52Z'
+        format:
+          type: string
+          enum:
+          - RFC3339
+    Radius:
+      required:
+      - value
+      - units
+      type: object
+      properties:
+        value:
+          format: float
+          description: >-
+            Distance from the centerpoint of a circular area, along the WGS84
+            ellipsoid.
+          type: number
+          minimum: 0
+          exclusiveMinimum: true
+          example: 300.183
+        units:
+          type: string
+          description: >-
+            FIXM-compatible units.  Only meters ("M") are acceptable for UTM.
+          enum:
+          - M
+    Circle:
+      description: A circular area on the surface of the earth.
+      type: object
+      properties:
+        center:
+          $ref: '#/components/schemas/LatLngPoint'
+        radius:
+          $ref: '#/components/schemas/Radius'
+    Volume3D:
+      description: >-
+        A three-dimensional geographic volume consisting of a
+        vertically-extruded shape. Exactly one outline must be specified.
+      type: object
+      properties:
+        outline_circle:
           anyOf:
-          - $ref: '#/components/schemas/GeoPolygon'
-          description: Projection of this volume onto the earth's surface.
-        altitude_lo:
+          - $ref: '#/components/schemas/Circle'
+          description: A circular geographic shape on the surface of the earth.
+        outline_polygon:
+          anyOf:
+          - $ref: '#/components/schemas/Polygon'
+          description: >-
+            A polygonal geographic shape on the surface of the earth.
+        altitude_lower:
+          description: >-
+            Minimum bounding altitude of this volume. Must be less than
+            altitude_upper, if specified.
           anyOf:
           - $ref: '#/components/schemas/Altitude'
-          description: Minimum bounding altitude of this volume.
-        altitude_hi:
+        altitude_upper:
+          description: >-
+            Maximum bounding altitude of this volume. Must be greater than
+            altitude_lower, if specified.
           anyOf:
           - $ref: '#/components/schemas/Altitude'
-          description: Maximum bounding altitude of this volume.
     Volume4D:
       description: Contiguous block of geographic spacetime.
       required:
-      - spatial_volume
+      - volume
       type: object
       properties:
-        spatial_volume:
-          anyOf:
-          - $ref: '#/components/schemas/Volume3D'
-          description: Constant spatial extent of this volume.
+        volume:
+          $ref: '#/components/schemas/Volume3D'
         time_start:
-          format: date-time
-          description: Beginning time of this volume.  RFC 3339 format, per OpenAPI
-            specification.
-          type: string
-          default: ''
+          description: Beginning time of this volume. Must be before time_end.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         time_end:
-          format: date-time
-          description: End time of this volume.  RFC 3339 format, per OpenAPI specification.
-          type: string
-          default: ''
+          description: End time of this volume. Must be after time_start.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
     GetSubscriptionResponse:
       description: Response to DSS request for the subscription with the given id.
       required:
@@ -938,10 +992,10 @@ components:
       type: object
       properties:
         timestamp:
-          format: date-time
           description: The remote ID service provider's timestamp for when this information
-            was current.  RFC 3339 format, per OpenAPI specification.
-          type: string
+            was current.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         flights:
           description: A list of all flights that have been within the requested area
             within the remote ID retention period.  This includes flights that are
@@ -1048,7 +1102,7 @@ components:
           $ref: '#/components/schemas/RIDFlightDetails'
     HorizontalAccuracy:
       description: |-
-        This is the NACp enumeration from ADS-B, plus 1m for a more complete range for UAs.
+        This is based on ADS-B NACp (plus the one extra increment).
 
         `HAUnknown`: Unknown horizontal accuracy
 
@@ -1096,7 +1150,7 @@ components:
       default: HAUnknown
     VerticalAccuracy:
       description: |-
-        This is the GVA enumeration from ADS-B, plus some finer values for UAs.
+        This is based on ADS-B Geodetic Vertical Accuracy (GVA) (plus the three extra increments)
 
         `VAUnknown`: Unknown vertical accuracy
 
@@ -1145,7 +1199,7 @@ components:
           description: The Subscription which was deleted.
     SpeedAccuracy:
       description: |-
-        This is the same enumeration scale and values from ADS-B NACv.
+        Provides quality/containment on horizontal ground speed.
 
         `SAUnknown`: Unknown speed accuracy
 
@@ -1174,11 +1228,9 @@ components:
         lat:
           anyOf:
           - $ref: '#/components/schemas/Latitude'
-          default: 0
         lng:
           anyOf:
           - $ref: '#/components/schemas/Longitude'
-          default: 0
         alt:
           format: float
           description: 'Geodetic altitude (NOT altitude above launch, altitude above
@@ -1217,11 +1269,17 @@ components:
             m.
           type: number
           default: -1000
+        height:
+          $ref: '#/components/schemas/RIDHeight'
     GeoPolygonString:
       description: |-
-        Plain-string representation of a geographic polygon consisting of at least three geographic points describing a closed polygon on the earth.  Each point consists of latitude,longitude in degrees.  Points are also comma-delimited, so this parameter will look like `lat1,lng1,lat2,lng2,lat3,lng3,...`  Latitude values must fall in the range [-90, 90] and longitude values must fall in the range [-180, 180].
+        Plain-string representation of a geographic polygon consisting of at least three geographic
+        points describing a closed polygon on the earth.  Each point consists of latitude,longitude
+        in degrees.  Points are also comma-delimited, so this parameter will look like
+        `lat1,lng1,lat2,lng2,lat3,lng3,...`  Latitude values must fall in the range [-90, 90] and
+        longitude values must fall in the range [-180, 180].
 
-        All of the requirements and clarifications for GeoPolygon apply to GeoPolygonString as well.
+        All of the requirements and clarifications for Polygon apply to GeoPolygonString as well.
       type: string
     RIDHeight:
       description: A relative altitude for the purposes of remote ID.
@@ -1252,6 +1310,7 @@ components:
       exclusiveMinimum: false
       type: number
       example: 34.123
+      default: 0
     Longitude:
       format: double
       description: Degrees of longitude east of the Prime Meridian, with reference
@@ -1263,6 +1322,7 @@ components:
       exclusiveMinimum: false
       type: number
       example: -118.456
+      default: 0
     LatLngPoint:
       description: Point on the earth's surface.
       required:
@@ -1275,11 +1335,43 @@ components:
         lat:
           $ref: '#/components/schemas/Latitude'
     Altitude:
-      format: float
-      description: An altitude, in meters, above the WGS84 ellipsoid.  Invalid, No
-        Value, or Unknown is –1000 m.
-      type: number
-      example: 19.5
+      type: object
+      required:
+      - value
+      - reference
+      - units
+      properties:
+        value:
+          description: >-
+            The numeric value of the altitude. Note that min and max values are
+            added as a sanity check. As use cases evolve and more options are
+            made available in terms of units of measure or reference systems,
+            these bounds may be re-evaluated. Invalid, No Value, or Unknown is
+            –1000 m.
+          type: number
+          format: double
+          minimum: -8000
+          exclusiveMinimum: false
+          maximum: 100000
+          exclusiveMaximum: false
+          example: 19.5
+        reference:
+          description: >-
+            A code indicating the reference for a vertical distance. See AIXM
+            5.1 and FIXM 4.2.0. Currently, UTM only allows WGS84 with no
+            immediate plans to allow other options. FIXM and AIXM allow for
+            'SFC' which is equivalent to AGL.
+          type: string
+          enum:
+          - W84
+        units:
+          description: >-
+            The reference quantities used to express the value of altitude. See
+            FIXM 4.2. Currently, UTM only allows meters with no immediate plans
+            to allow other options.
+          type: string
+          enum:
+          - M
     RIDFlight:
       description: Description of a remote ID flight.
       required:
@@ -1291,7 +1383,7 @@ components:
           $ref: '#/components/schemas/RIDFlightID'
         aircraft_type:
           anyOf:
-          - $ref: '#/components/schemas/RIDAircraftType'
+          - $ref: '#/components/schemas/UAType'
           description: Generic type of aircraft.
         current_state:
           anyOf:
@@ -1309,20 +1401,18 @@ components:
             at some point during the flight but has not yet received telemetry, this
             field should be populated with the USS's best estimate of the position
             of the flight with appropriate accuracy indications.
-        volumes:
+        operating_area:
           description: |-
-            The set of spacetime volumes the aircraft is within.  Required,
-            with 1 or more elements, if `current_state` is not specified.  The fields
-            `time_start` and `time_end` are required if `current_state` is not specified.
+            The area the aircraft is/are within.  Required, with 1 or more elements, if
+            `current_state` is not specified.  The fields `time_start` and `time_end` are
+            required.
 
             If `current_state` is specified, this field should not be specified.
             If `current_state` was available at any time during the flight, or is
             expected to be available at any time during the flight, this field should
             not be specified.
-          type: array
-          items:
-            $ref: '#/components/schemas/Volume4D'
-          default: []
+          anyOf:
+          - $ref: '#/components/schemas/OperatingArea'
         simulated:
           description: If specified as true, this flight is not a physical aircraft;
             it is just a simulation to test the system.
@@ -1339,14 +1429,33 @@ components:
           items:
             $ref: '#/components/schemas/RIDRecentAircraftPosition'
           default: []
-    GeoPolygon:
-      description: |-
-        An enclosed area on the earth.
-        The bounding edges of this polygon shall be the shortest paths between connected vertices.  This means, for instance, that the edge between two points both defined at a particular latitude is not generally contained at that latitude.
-        The winding order shall be interpreted as the order which produces the smaller area.
-        The path between two vertices shall be the shortest possible path between those vertices.
-        Edges may not cross.
-        Vertices may not be duplicated.  In particular, the final polygon vertex shall not be identical to the first vertex.
+    OperatingArea:
+      description: Area of operation containing one or more aircraft participating in remote identification.
+      type: object
+      properties:
+        aircraft_count:
+          format: int32
+          description: Allows for operating a single UA, group, formation, or swarm. Quantity in Group.
+          minimum: 1
+          exclusiveMinimum: false
+          type: integer
+        volumes:
+          description: The area where a group or Intent-Based Network Participant operation is planned or taking place.
+          type: array
+          items:
+            $ref: '#/components/schemas/OperatingArea'
+          default: []
+    Polygon:
+      description: >-
+        An enclosed area on the earth. The bounding edges of this polygon are
+        defined to be the shortest paths between connected vertices.  This
+        means, for instance, that the edge between two points both defined at a
+        particular latitude is not generally contained at that latitude. The
+        winding order must be interpreted as the order which produces the
+        smaller area. The path between two vertices is defined to be the
+        shortest possible path between those vertices. Edges may not cross.
+        Vertices may not be duplicated.  In particular, the final polygon vertex
+        must not be identical to the first vertex.
       required:
       - vertices
       type: object
@@ -1477,19 +1586,26 @@ components:
           - $ref: '#/components/schemas/Subscription'
           description: Result of the operation on the subscription.
     RIDOperationalStatus:
-      description: Indicates operational status of associated aircraft.
+      description: |-
+        Operational Status indicates whether the associated UA is on the ground, airborne, or in an
+        emergency situation, or the Remote ID system has failed. The emergency status takes
+        precedence over the other status modes. This status can be used for filtering purposes.
       enum:
       - Undeclared
       - Ground
       - Airborne
       - Emergency
+      - RemoteIDSystemFailure
       type: string
       default: Undeclared
     SpecificSessionID:
       description: |-
-        A unique 20-byte ID, typically temporary, to protect exposure of operationally
-        sensitive information and potentially to provide other benefits; the first
-        byte is the universally unique Session ID Scheme ID, an index into a registry of schemes, enabling resolution to the Serial Number by authorized parties only. Initial scheme registry entries shall include:
+        A unique 20 byte ID intended to identify a specific flight (session) while providing a
+        greater level of privacy to the operator. The first byte is the registered unique Specific Session ID
+        Type maintained by a registrar (see Annex A5), and the remaining 19 bytes is the Session ID per the
+        Specific Session ID Type specification.
+
+        Initial scheme registry entries include:
 
         0 – reserved
         1 – Internet Engineering Task Force (IETF) Drone Remote Identification Protocol (DRIP) entity ID
@@ -1505,56 +1621,51 @@ components:
       type: object
       properties:
         serial_number:
-          description: Can be specified when no registration ID exists and required
-            by law in a region. This is expressed in the CTA-2063-A Serial Number
-            format.
+          description: This is expressed in the CTA-2063-A Serial Number format.
           type: string
           example: INTCJ123-4567-890
           default: ''
-        registration_number:
+        registration_id:
           description: If a CAA provides a method of registering UAS, this number
-            is provided by the CAA or its authorized representative.
+            is provided by the CAA or its authorized representative.  Format is
+            <ICAO Nationality MarkA>.<CAA Assigned ID>, ASCII encoded, only
+            uppercase letters (A-Z), dot (.), and digits (0-9) are allowed.
+            Example is valid for the US.
           type: string
-          example: FA12345897
+          example: N.123456
           default: ''
         utm_id:
-          description: A UTM-provided unique ID traceable to a non-obfuscated ID that
-            can act like a "session id" to protect exposure of operationally sensitive
-            information.
+          description: A UTM-provided universally unique ID traceable to a
+            non-obfuscated ID that acts as a "session id" to protect exposure of
+            operationally sensitive information.
           type: string
           example: ae1fa066-6d68-4018-8274-af867966978e
           default: ''
         specific_session_id:
           $ref: '#/components/schemas/SpecificSessionID'
     OperatorLocation:
-      description: Location of UAS operator.
+      description: Location associated with the Remote Pilot
       type: object
       required:
       - position
-      - altitude
-      - altitude_type
       properties:
         position:
           anyOf:
           - $ref: '#/components/schemas/LatLngPoint'
-          description: Position of UAS operator.
+          description: Position of the Remote Pilot.
         altitude:
           anyOf:
           - $ref: '#/components/schemas/Altitude'
-          description: Geodetic altitude of UAS operator.
+          description: Provides the Operator Altitude based on WGS-84 height above ellipsoid (HAE)
+            (See Geodetic Altitude).  This value is provided in meters and must have a minimum
+            resolution of 1 m.
         altitude_type:
-          description: Source of data for the altitude of the UAS operator.
+          description: Source of data for the altitude field.
           type: string
           enum:
-          - TakeOff
-          - LiveGNSS
-          - FixedLocation
-    ClassificationType:
-      type: string
-      enum:
-      - Undeclared
-      - EuropeanUnion
-      default: Undeclared
+          - Takeoff
+          - Dynamic
+          - Fixed
     UAClassificationEU:
       type: object
       properties:
@@ -1592,16 +1703,20 @@ components:
           example: a3423b-213401-0023
         eu_classification:
           description: When this field is specified, the Classification Type is "European
-            Union".  Otherwise, the Classification Type is "Undeclared".
+            Union".  If no other classification field is specified, the Classification Type
+            is "Undeclared".
           anyOf:
           - $ref: '#/components/schemas/UAClassificationEU'
         uas_id:
           $ref: '#/components/schemas/UASID'
         operator_id:
-          description: CAA-issued registration/license ID for the remote pilot or
-            operator.
+          description: This optional field provides a CAA-issued registration/license ID for the
+            remote pilot or operator. Format is <ICAO Nationality MarkA>.<CAA Assigned ID>, ASCII
+            encoded, only uppercase letters (A-Z), dot (.), and digits (0-9) are allowed. Example
+            is valid for the US.
           type: string
           default: ''
+          example: N.OP123456
         operator_location:
           $ref: '#/components/schemas/OperatorLocation'
         operation_description:
@@ -1621,10 +1736,9 @@ components:
       type: object
       properties:
         time:
-          format: date-time
-          description: Time at which this position applied.  RFC 3339 format, per
-            OpenAPI specification.
-          type: string
+          description: Time at which this position applied.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         position:
           $ref: '#/components/schemas/RIDAircraftPosition'
     GetIdentificationServiceAreaResponse:
@@ -1719,7 +1833,7 @@ components:
           $ref: '#/components/schemas/SubscriptionUSSBaseURL'
     Subscription:
       description: Specification of a geographic area that a client is interested
-        in on an ongoing basis (e.g., “planning area”).  Internal to the DSS.
+        in on an ongoing basis (e.g., "planning area").  Internal to the DSS.
       required:
       - id
       - uss_base_url
@@ -1743,17 +1857,15 @@ components:
           - $ref: '#/components/schemas/SubscriptionNotificationIndex'
           default: 0
         time_end:
-          format: date-time
           description: If set, this subscription will be automatically removed after
-            this time.  RFC 3339 format, per OpenAPI specification.
-          type: string
-          default: ''
+            this time.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         time_start:
-          format: date-time
           description: If set, this Subscription will not generate any notifications
-            before this time.  RFC 3339 format, per OpenAPI specification.
-          type: string
-          default: ''
+            before this time.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         version:
           $ref: '#/components/schemas/Version'
     IdentificationServiceArea:
@@ -1777,13 +1889,13 @@ components:
           type: string
           example: myuss
         time_start:
-          format: date-time
-          description: Beginning time of service.  RFC 3339 format, per OpenAPI specification.
-          type: string
+          description: Beginning time of service.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         time_end:
-          format: date-time
-          description: End time of service.  RFC 3339 format, per OpenAPI specification.
-          type: string
+          description: End time of service.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         version:
           $ref: '#/components/schemas/Version'
         id:
@@ -1794,19 +1906,18 @@ components:
       description: State of an aircraft for the purposes of remote ID.
       required:
       - timestamp
-      - accuracy_h
-      - accuracy_v
+      - timestamp_accuracy
       - position
+      - speed_accuracy
       type: object
       properties:
         timestamp:
-          format: date-time
           description: Time at which this state was valid.  This may be the time coming
             from the source, such as a GPS, or the time when the system computes the
             values using an algorithm such as an Extended Kalman Filter (EKF).  Timestamp
-            must be expressed with a minimum resolution of 1/10th of a second.  RFC
-            3339 format, per OpenAPI specification.
-          type: string
+            must be expressed with a minimum resolution of 1/10th of a second.
+          anyOf:
+          - $ref: '#/components/schemas/Time'
         timestamp_accuracy:
           format: float
           description: 'Declaration of timestamp accuracy, which is the largest difference
@@ -1826,8 +1937,9 @@ components:
         track:
           format: float
           description: Direction of flight expressed as a "True North-based" ground
-            track angle.  This value is provided in degrees East of North with a minimum
-            resolution of 1 degree.  A value of 360 indicates invalid, no value, or
+            track angle.  This value is provided in clockwise degrees with a minimum
+            resolution of 1 degree.  If aircraft is not moving horizontally, use the
+            "Unknown" value.  A value of 361 indicates invalid, no value, or
             unknown.
           maximum: 361
           exclusiveMaximum: false
@@ -1847,7 +1959,7 @@ components:
         speed_accuracy:
           anyOf:
           - $ref: '#/components/schemas/SpeedAccuracy'
-          description: Accuracy of horizontal ground speed.
+          description: Provides quality/containment on horizontal ground speed.
         vertical_speed:
           format: float
           description: Speed up (vertically) WGS84-HAE, m/s.  Invalid, No Value, or
@@ -1855,55 +1967,15 @@ components:
           type: number
           example: 0.2
           default: 63
-        height:
-          $ref: '#/components/schemas/RIDHeight'
-        group_radius:
-          format: float
-          description: Farthest horizontal distance from reported group location at
-            which an aircraft in the group may be located (meters).  This value contains
-            the "Operating Area Radius" data from the common data dictionary when
-            group operation area is specified by point-radius.
-          minimum: 0
-          exclusiveMinimum: true
-          type: number
-        group_ceiling:
-          format: float
-          description: Maximum altitude (meters WGS84-HAE) of Group Operation.  This
-            value contains the "Operating Area Ceiling" data from the common data
-            dictionary when group operation area is specified by point-radius.  Invalid,
-            No Value, or Unknown is –1000 m.
-          type: number
-        group_floor:
-          format: float
-          description: Minimum altitude (meters WGS84-HAE) of Group Operation.  If
-            not specified, ground level shall be assumed.  This value contains the
-            "Operating Area Floor" data from the common data dictionary when group
-            operation area is specified by point-radius.  Invalid, No Value, or Unknown
-            is –1000 m.
-          type: number
-        group_count:
-          format: int32
-          description: When operating a group (or formation or swarm), number of aircraft
-            in group.  This value contains the "Operating Area Count" data from the
-            common data dictionary when group operation area is specified by point-radius.
-          minimum: 1
-          exclusiveMinimum: false
-          type: integer
-        group_time_start:
-          format: date-time
-          description: Time at which a group operation starts.  This value contains
-            the "Operation Area Start" data from the common data dictionary when group
-            operation area is specified by point-radius.
-          type: string
-        group_time_end:
-          format: date-time
-          description: Time at which a group operation starts.  This value contains
-            the "Operation Area End" data from the common data dictionary when group
-            operation area is specified by point-radius.
-          type: string
-    RIDAircraftType:
+    UAType:
       description: |-
-        Type of aircraft for the purposes of remote ID.
+        The UA Type can help infer performance, speed, and duration of flights, for example, a
+        "fixed wing" can generally fly in a forward direction only (as compared to a multi-rotor).
+        This can also help differentiate aircraft types without sharing operationally sensitive
+        information like the make and model of a particular aircraft. Make and model are
+        anticipated to become available during the Registration ID lookup process. UAS Type is also
+        useful for correlating visual observation with data received. The types were formulated
+        based on unique flight characteristics.
 
         `HybridLift` is a fixed wing aircraft that can take off vertically.  `Helicopter` includes multirotor.
       enum:
@@ -1928,7 +2000,7 @@ components:
     USSBaseURL:
       description: |-
         The base URL of a USS implementation of part or all of the remote ID USS-USS API. Per the USS-USS API, the full URL
-        of a particular resource can be constructed by appending, e.g., `/uss/v1/{resource}/{id}` to this base URL.
+        of a particular resource can be constructed by appending, e.g., `/uss/{resource}/{id}` to this base URL.
         Accordingly, this URL may not have a trailing '/' character.
       type: string
       example: https://example.com/rid
@@ -1945,38 +2017,67 @@ components:
       anyOf:
       - $ref: '#/components/schemas/USSBaseURL'
   securitySchemes:
-    AuthFromAuthorizationAuthority:
+    Authority:
       flows:
         clientCredentials:
-          tokenUrl: https://example.com/oauth/token
+          tokenUrl: https://auth.example.com/oauth/token
           scopes:
             rid.display_provider: Client may query, read, or create subscriptions
               for Identification Service Areas for remote ID.  A remote ID display
-              provider shall be granted this scope upon request.
+              provider should be granted this scope upon request.
             rid.service_provider: Client may create, edit, and delete Identification
-              Service Areas for remote ID.  A remote ID service provider shall be
-              granted this scope upon request.
+              Service Areas for remote ID.  A remote ID service provider should
+              be granted this scope upon request.
       type: oauth2
-      description: |-
-        Authorization from, or on behalf of, an authorization authority.  This authority shall issue access tokens that are JSON Web Tokens as defined in RFC 7519, using the `RS256` algorithm for the signature, and publish to all providers the public key for verifying that signature.
+      description: >-
+        Authorization from, or on behalf of, an authorization authority.  This
+        authority will issue access tokens that are JSON Web Tokens as defined
+        in RFC 7519, using the `RS256` algorithm for the signature, publish to
+        all providers the public key for verifying that signature, and implement
+        standard OAuth server discovery mechanisms as described in RFC 8414.
 
-        The following fields shall be included in the JWT claim for access tokens issued by this authority:
-        * `iss`, with the URL at which the token generation request was received.
+        The following fields must be included in the JWT claim for access tokens
+        issued by this authority:
+
+        * `iss`, with the URL at which the token generation request was
+        received.
+
         * `exp`, with a time no further than 1 hour in the future.
+
         * `sub`, with unique ID of the client requesting the access token.
-        * `scope`, with a string composed of a space-separated list of strings indicating the scopes granted, per RFC 6749.
 
-        Multiple scopes for a single token shall be granted if requested.  The tokens granted by this authority shall protect against reuse of received tokens to impersonate the sender to other recipients (via use of the `aud` claim or other means).
+        * `scope`, with a string composed of a space-separated list of strings
+        indicating the scopes granted, per RFC 6749.
 
-        When using the `aud` claim to protect against the reuse of received tokens, and absent guidance on behalf of the competent authority to the contrary, the JWT `aud` claim requested by the client shall be included in each access token and shall contain the fully qualified domain name of the URL the access token will be used to access.  For example, if a USS were querying the endpoint at https://dss.example.com:8888/rid/v2/dss/identification_service_areas, the access token included in the request should specify `"aud": "dss.example.com"`.
+        * `jti`, according to RFC 7519.
 
-        Clients shall provide these access tokens in an `Authorization` header in the form `Bearer <token>` in accordance with RFC 6750.
+        Following the principle of least privilege, only one of the scopes
+        enumerated in this document should usually be granted in a single token
+        (though other scopes may accompany it).  The tokens granted by this
+        authority must protect against reuse of received tokens to impersonate
+        the sender to other recipients (via use of the `aud` claim or other
+        means).
+
+        When using the `aud` claim to protect against the reuse of received
+        tokens, and absent guidance on behalf of the competent authority to the
+        contrary, the JWT `aud` claim requested by the client must be included
+        in each access token and must contain the fully qualified domain name of
+        the URL the access token will be used to access.  For example, if a USS
+        were querying the endpoint at
+        https://dss.example.com:8888/rid/dss/identification_service_areas,
+        the access token included in the request should specify `"aud":
+        "dss.example.com"`.
+
+        Clients must provide these access tokens in an `Authorization` header in
+        the form `Bearer <token>` in accordance with RFC 6750.
 security:
-- AuthFromAuthorizationAuthority:
+- Authority:
   - rid.display_provider
   - rid.service_provider
 tags:
 - name: dss
   description: Endpoints exposed by the DSS server.
-- name: p2p_rid
+- name: sp
   description: Endpoints exposed by remote ID service providers for peer-peer communication.
+- name: dp
+  description: Endpoints exposed by remote ID display providers for peer-peer communication.
