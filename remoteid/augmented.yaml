@@ -555,6 +555,7 @@ paths:
       security:
       - AuthFromAuthorizationAuthority:
         - dss.read.identification_service_areas
+      - AuthFromAuthorizationAuthority:
         - dss.write.identification_service_areas
       summary: /dss/subscriptions/{id}
       description: Verify the existence/valdity and state of a particular subscription.
@@ -1780,6 +1781,7 @@ components:
 security:
 - AuthFromAuthorizationAuthority:
   - dss.read.identification_service_areas
+- AuthFromAuthorizationAuthority:
   - dss.write.identification_service_areas
 tags:
 - name: dss
