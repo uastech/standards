@@ -131,6 +131,8 @@ paths:
       security:
       - Authority:
         - rid.display_provider
+      - Authority:
+        - rid.service_provider
       summary: /dss/identification_service_areas/{id}
       description: Retrieve full information of an Identification Service Area owned
         by the client.
