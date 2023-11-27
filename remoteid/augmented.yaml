@@ -1549,7 +1549,6 @@ components:
         in on an ongoing basis (e.g., “planning area”).  Internal to the DSS.
       required:
       - id
-      - url
       - notification_index
       - owner
       - version
